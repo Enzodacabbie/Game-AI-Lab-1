@@ -37,7 +37,25 @@ class Boid
    {
      if (target != null)
      {  
-        // TODO: Implement seek here
+        float angle = atan2(kinematic.position.y - target.y, kinematic.position.y - target.x);
+        //normalize the angle
+        angle = normalize_angle(angle);
+        
+        double deltaX = target.x - kinematic.position.x; 
+        double deltaY = target.y - kinematic.position.y;
+        
+        //calculate the distance to the target by taking the square root of sum of squared delta distances
+        double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        
+        float constant = 3;
+        System.out.println(angle);
+        if(angle < 0.5)
+        {
+          //constant = 0;
+          
+        }
+        kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
+          
      }
      
      // place crumbs, do not change     

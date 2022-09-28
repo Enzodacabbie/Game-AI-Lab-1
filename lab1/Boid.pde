@@ -37,10 +37,13 @@ class Boid
    {
      if (target != null)
      {  
-        float angle = atan2(  target.y- kinematic.position.y,  target.x -  kinematic.position.y);
+        //float angle = atan2(  target.y- kinematic.position.y,  target.x -  kinematic.position.y);
         //normalize the angle
-        angle = normalize_angle(angle);
-        double requiredRotation = angle-kinematic.getHeading();
+        //angle = normalize_angle(angle);
+        //double requiredRotation = angle-kinematic.getHeading();
+        
+        float angle = atan2(target.y - kinematic.getPosition().y, target.x - kinematic.getPosition().x);
+        float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
         
         double deltaX = target.x - kinematic.position.x; 
         double deltaY = target.y - kinematic.position.y;
@@ -51,7 +54,6 @@ class Boid
         //float constant;
         System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
         
-          //kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
           if(requiredRotation <= 0.05 && requiredRotation >= -0.05)
           {
             kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
@@ -61,7 +63,6 @@ class Boid
           {
             kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (float)angle);
           }
-       
      }
      
      // place crumbs, do not change     

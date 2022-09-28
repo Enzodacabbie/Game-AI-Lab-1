@@ -37,7 +37,7 @@ class Boid
    {
      if (target != null)
      {  
-        float angle = atan2(kinematic.position.y - target.y, kinematic.position.y - target.x);
+        float angle = atan2(  target.y- kinematic.position.y,  target.x -  kinematic.position.y);
         //normalize the angle
         angle = normalize_angle(angle);
         double requiredRotation = angle-kinematic.getHeading();
@@ -54,19 +54,13 @@ class Boid
           //kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
           if(requiredRotation <= 0.05 && requiredRotation >= -0.05)
           {
-            kinematic.increaseSpeed(acceleration * dt * 80, -kinematic.getRotationalVelocity());
-            kinematic.increaseSpeed(acceleration * dt * 80, 0);
+            kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
+            kinematic.increaseSpeed(acceleration * dt * (float)distance, 0);
           }
           else
           {
-            kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
+            kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (float)angle);
           }
-          /***
-          if(requiredRotation<0.5 && requiredRotation>-0.5)
-          {
-            kinematic.increaseSpeed(acceleration * dt * 80, -kinematic.getRotationalVelocity());
-          }
-          ***/
        
      }
      

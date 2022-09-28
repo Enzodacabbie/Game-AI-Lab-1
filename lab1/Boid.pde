@@ -48,25 +48,19 @@ class Boid
         //calculate the distance to the target by taking the square root of sum of squared delta distances
         double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
         
-        float constant = 3;
+        //float constant;
         System.out.println(requiredRotation);
         
-        if(requiredRotation!=0){
-          kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
-          if(kinematic.getHeading()==angle)
+        //if(requiredRotation!=0){
+          kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
+          
+          if(requiredRotation<0.5 && requiredRotation>-0.5)
           {
+            //constant = -1;
             kinematic.increaseSpeed(acceleration * dt * 80, -rotational_acceleration * dt);
           }
-        }
-        /***
-        if(requiredRotation < 0.5)
-        {
-          //constant = 0;
-          
-        }
-        ***/
-        //kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
-          
+        //}
+       
      }
      
      // place crumbs, do not change     

@@ -40,6 +40,7 @@ class Boid
         float angle = atan2(kinematic.position.y - target.y, kinematic.position.y - target.x);
         //normalize the angle
         angle = normalize_angle(angle);
+        double requiredRotation = angle-kinematic.getHeading();
         
         double deltaX = target.x - kinematic.position.x; 
         double deltaY = target.y - kinematic.position.y;
@@ -48,13 +49,23 @@ class Boid
         double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
         
         float constant = 3;
-        System.out.println(angle);
-        if(angle < 0.5)
+        System.out.println(requiredRotation);
+        
+        if(requiredRotation!=0){
+          kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
+          if(kinematic.getHeading()==angle)
+          {
+            kinematic.increaseSpeed(acceleration * dt * 80, -rotational_acceleration * dt);
+          }
+        }
+        /***
+        if(requiredRotation < 0.5)
         {
           //constant = 0;
           
         }
-        kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
+        ***/
+        //kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt * constant);
           
      }
      

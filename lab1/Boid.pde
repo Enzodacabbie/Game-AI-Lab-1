@@ -49,7 +49,7 @@ class Boid
         
         System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
         
-          if(requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
+          if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
           {
             kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
             kinematic.increaseSpeed(acceleration * dt * (float)distance, 0);
@@ -61,6 +61,11 @@ class Boid
           else
           {
             kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (-1));
+          }
+          
+          if (abs((float)distance) <= 20) // stop at the target
+          {
+            kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
           }
      }
      

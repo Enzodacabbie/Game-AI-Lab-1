@@ -49,17 +49,24 @@ class Boid
         double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
         
         //float constant;
-        System.out.println(requiredRotation);
+        System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
         
-        //if(requiredRotation!=0){
-          kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
-          
+          //kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
+          if(requiredRotation <= 0.05 && requiredRotation >= -0.05)
+          {
+            kinematic.increaseSpeed(acceleration * dt * 80, -kinematic.getRotationalVelocity());
+            kinematic.increaseSpeed(acceleration * dt * 80, 0);
+          }
+          else
+          {
+            kinematic.increaseSpeed(acceleration * dt * 80, rotational_acceleration * dt);
+          }
+          /***
           if(requiredRotation<0.5 && requiredRotation>-0.5)
           {
-            //constant = -1;
-            kinematic.increaseSpeed(acceleration * dt * 80, -rotational_acceleration * dt);
+            kinematic.increaseSpeed(acceleration * dt * 80, -kinematic.getRotationalVelocity());
           }
-        //}
+          ***/
        
      }
      

@@ -41,7 +41,7 @@ class Boid
         double deltaX = target.x - kinematic.position.x; 
         double deltaY = target.y - kinematic.position.y;
         
-        float angle = atan2(target.y - kinematic.getPosition().y, target.x - kinematic.getPosition().x);
+        float angle = atan2((float)deltaY, (float)deltaX);
         float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
         
         //calculate the distance to the target by taking the square root of sum of squared delta distances

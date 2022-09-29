@@ -93,26 +93,40 @@ class Boid
      //calculate the distance to the target by taking the square root of sum of squared delta distances
      double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
         
-     System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity());
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
-       kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
-       kinematic.increaseSpeed(acceleration * dt * (float)distance, 0);
+       kinematic.increaseSpeed(acceleration * dt * 20, -kinematic.getRotationalVelocity());
+       kinematic.increaseSpeed(acceleration * dt * 20, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
      {
-       kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt);
+       kinematic.increaseSpeed(acceleration * dt * 20, rotational_acceleration * dt);
      }
      else
      {
-       kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (-1));
+       kinematic.increaseSpeed(acceleration * dt * 20, rotational_acceleration * dt * (-1));
      }
+
           
-     if (abs((float)distance) <= 20) // stop at the target
+     if (abs((float)distance) <= 90 && abs((float)distance) > 80 && kinematic.getSpeed() > 0) // gradual slow down if moving forward
+     {
+       kinematic.increaseSpeed(acceleration * dt * -1 * 20, 0);
+     }
+     else if (abs((float)distance) <= 80 && abs((float)distance) > 75 && kinematic.getSpeed() > 0) 
+     {
+       kinematic.increaseSpeed(acceleration * dt * -2 *20, 0);
+     }
+     else if (abs((float)distance) <= 75 && kinematic.getSpeed() > 0) 
+     {
+       kinematic.increaseSpeed(acceleration * dt * -3 *20, 0);
+     }
+     else if (kinematic.getSpeed() <= 0) //if moving backwards, stop moving
      {
        kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
      }
+  
    }
    
    void seek(PVector target)

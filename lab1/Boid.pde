@@ -37,36 +37,7 @@ class Boid
    {
      if (target != null)
      {  
-       
-        double deltaX = target.x - kinematic.position.x; 
-        double deltaY = target.y - kinematic.position.y;
-        
-        float angle = atan2((float)deltaY, (float)deltaX);
-        float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
-        
-        //calculate the distance to the target by taking the square root of sum of squared delta distances
-        double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
-        
-        System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
-        
-          if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
-          {
-            kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
-            kinematic.increaseSpeed(acceleration * dt * (float)distance, 0);
-          }
-          else if (requiredRotation > 0) // if required rotation is positive, go right
-          {
-            kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt);
-          }
-          else
-          {
-            kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (-1));
-          }
-          
-          if (abs((float)distance) <= 20) // stop at the target
-          {
-            kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
-          }
+        move(dt);
      }
      
      // place crumbs, do not change     
@@ -110,6 +81,39 @@ class Boid
      float y2p = y - (BOID_SIZE/2)*cos(r);
      triangle(xp, yp, x1p, y1p, x2p, y2p);
    } 
+   
+   void move(float dt)
+   {
+     double deltaX = target.x - kinematic.position.x; 
+     double deltaY = target.y - kinematic.position.y;
+        
+     float angle = atan2((float)deltaY, (float)deltaX);
+     float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
+        
+     //calculate the distance to the target by taking the square root of sum of squared delta distances
+     double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        
+     System.out.println(requiredRotation + ", " + kinematic.getRotationalVelocity());
+        
+     if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
+     {
+       kinematic.increaseSpeed(acceleration * dt * (float)distance, -kinematic.getRotationalVelocity());
+       kinematic.increaseSpeed(acceleration * dt * (float)distance, 0);
+     }
+     else if (requiredRotation > 0) // if required rotation is positive, go right
+     {
+       kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt);
+     }
+     else
+     {
+       kinematic.increaseSpeed(acceleration * dt * (float)distance, rotational_acceleration * dt * (-1));
+     }
+          
+     if (abs((float)distance) <= 20) // stop at the target
+     {
+       kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
+     }
+   }
    
    void seek(PVector target)
    {

@@ -112,23 +112,36 @@ class Boid
      float rScaler = requiredRotation/3.1456; 
         
      if(distance <= initialTargetDistance/2) { //if we are closer than half the distance, begin to decelerate
-       vScaler = -vScaler;
+       vScaler = -vScaler ;
+     }
+     if(distance <= initialTargetDistance/3) {
+        vScaler  *= 2;
+     }
+     if(distance <= initialTargetDistance/4) {
+        vScaler  *= 2;
+        if(kinematic.getSpeed() <= 20)
+          vScaler = 0;
      }
      
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + rScaler);
+     
+     
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + distance);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
-       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, -kinematic.getRotationalVelocity() - rScaler);
-       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, 0);
+       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, -kinematic.getRotationalVelocity());
+       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
      {
-       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, rotational_acceleration * dt* Math.abs(rScaler));
+       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, rotational_acceleration * dt* Math.abs(rScaler));
      }
-     else
+     else //turn left 
      {
-       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
+       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
+     }
+     if(distance <= 5) {
+        kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
      }
 
      if(followPath == true)

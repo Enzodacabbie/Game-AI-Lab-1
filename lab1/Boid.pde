@@ -125,9 +125,9 @@ class Boid
      
      
      
-     float x = 20;
+     float x = 10;
      
-     float movement = acceleration * dt * x;
+     float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      if (vScaler < 0.5) {
        x = -x;
        

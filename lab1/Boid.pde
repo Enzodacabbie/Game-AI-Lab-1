@@ -163,6 +163,8 @@ class Boid
      }
      if(distance <= 5) {
         kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
+        topSpeed = 0;
+        initialTargetDistance = 0;
      }
 
      if(followPath == true)

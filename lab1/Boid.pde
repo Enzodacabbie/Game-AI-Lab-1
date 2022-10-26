@@ -27,6 +27,7 @@ class Boid
    ArrayList<PVector> path;
    boolean followPath;
    float initialTargetDistance = 0;
+   float topSpeed = 0;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -87,6 +88,7 @@ class Boid
    
    void move(float dt)
    {
+     
      double deltaX = target.x - kinematic.position.x; 
      double deltaY = target.y - kinematic.position.y;
      
@@ -110,35 +112,48 @@ class Boid
      float vScaler = (float)distance/initialTargetDistance; 
      //ratio of requiredAngle left to turn over pi
      float rScaler = requiredRotation/3.1456; 
-        
+    
+     /**  
      if(distance <= initialTargetDistance/2) { //if we are closer than half the distance, begin to decelerate
        vScaler = -vScaler ;
      }
-     if(distance <= initialTargetDistance/3) {
-        vScaler  *= 2;
+     */
+     
+     if (kinematic.getSpeed() > topSpeed) 
+       topSpeed = kinematic.getSpeed();
+     
+     
+     
+     
+     float x = 20;
+     
+     float movement = acceleration * dt * x;
+     if (vScaler < 0.5) {
+       x = -x;
+       
+       if(kinematic.getSpeed() <= topSpeed/2) {
+         x = 0;
+       }
+       movement = acceleration * dt * x;
+         
      }
-     if(distance <= initialTargetDistance/4) {
-        vScaler  *= 2;
-        if(kinematic.getSpeed() <= 20)
-          vScaler = 0;
-     }
      
      
      
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + distance);
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
-       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, -kinematic.getRotationalVelocity());
-       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, 0);
+       kinematic.increaseSpeed(movement, -kinematic.getRotationalVelocity());
+       kinematic.increaseSpeed(movement, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
      {
-       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, rotational_acceleration * dt* Math.abs(rScaler));
+       kinematic.increaseSpeed(movement, rotational_acceleration * dt* Math.abs(rScaler));
      }
      else //turn left 
      {
-       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
+       kinematic.increaseSpeed(movement, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
      }
      if(distance <= 5) {
         kinematic.increaseSpeed(-kinematic.getSpeed(), 0);

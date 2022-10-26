@@ -24,6 +24,9 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
+   ArrayList<PVector> path;
+   boolean followPath;
+   float initialTargetDistance = 0;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -86,30 +89,74 @@ class Boid
    {
      double deltaX = target.x - kinematic.position.x; 
      double deltaY = target.y - kinematic.position.y;
-        
-     float angle = atan2((float)deltaY, (float)deltaX);
+     
+     //find angle between from the boid to the target in relation to the the x axis
+     float angle = atan2((float)deltaY, (float)deltaX); 
+     
+     //find angle to turn from the angle 
      float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
+     
         
      //calculate the distance to the target by taking the square root of sum of squared delta distances
      double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+     
+     //since the boid always moves closer to the target, the distance is largest at its initial 
+     if(distance >= initialTargetDistance) { 
+       initialTargetDistance = (float)distance;
+     } 
+     
+     
+     //ratio of distance left to travel over the total distance needed to be travelled
+     float vScaler = (float)distance/initialTargetDistance; 
+     //ratio of requiredAngle left to turn over pi
+     float rScaler = requiredRotation/3.1456; 
         
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity());
+     if(distance <= initialTargetDistance/2) { //if we are closer than half the distance, begin to decelerate
+       vScaler = -vScaler;
+     }
+     
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + rScaler);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
-       kinematic.increaseSpeed(acceleration * dt * 20, -kinematic.getRotationalVelocity());
-       kinematic.increaseSpeed(acceleration * dt * 20, 0);
+       kinematic.increaseSpeed(acceleration * dt * 20 * vScaler, -kinematic.getRotationalVelocity() - rScaler);
+       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
      {
-       kinematic.increaseSpeed(acceleration * dt * 20, rotational_acceleration * dt);
+       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, rotational_acceleration * dt* Math.abs(rScaler));
      }
      else
      {
-       kinematic.increaseSpeed(acceleration * dt * 20, rotational_acceleration * dt * (-1));
+       kinematic.increaseSpeed(acceleration * dt * 20* vScaler, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
      }
 
-          
+     if(followPath == true)
+     {
+       //handle if there is a path to follow
+       
+       //the first element in path will always be the current target
+       //the second element is the next target in the path
+       //when the target is reached, removed the first element
+       
+       //if there is a waypoint after current target
+       if(path.get(1) != null)
+       {
+         //calculate the angle between the current target and next target
+         double waypointX = target.x - path.get(1).x;
+         double waypointY = target.y - path.get(1).y;
+         
+         float waypointAngle = atan2((float)waypointX, (float)waypointY);
+         if(distance < 0.05) { //if we are near the current target and there is a next target
+           target = path.get(1);
+           path.remove(0);
+         }
+         
+         
+       }
+       
+     }
+     /**
      if (abs((float)distance) <= 90 && abs((float)distance) > 80 && kinematic.getSpeed() > 0) // gradual slow down if moving forward
      {
        kinematic.increaseSpeed(acceleration * dt * -1 * 20, 0);
@@ -126,6 +173,7 @@ class Boid
      {
        kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
      }
+     */
   
    }
    
@@ -139,6 +187,7 @@ class Boid
    {
       // TODO: change to follow *all* waypoints
       this.target = waypoints.get(0);
-      
+      path = waypoints;
+      followPath = true;
    }
 }

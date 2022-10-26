@@ -134,9 +134,15 @@ class Boid
        if(kinematic.getSpeed() <= topSpeed/2) {
          x = 0;
        }
+     } 
+     if(vScaler < 0.1) {
+       x = -25;
+       if(kinematic.getSpeed() <= topSpeed/5)
+         x=0;
+     }
        movement = acceleration * dt * x;
          
-     }
+     
      
      
      

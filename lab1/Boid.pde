@@ -28,6 +28,7 @@ class Boid
    boolean followPath;
    float initialTargetDistance = 0;
    float topSpeed = 0;
+   float topRotSpeed = 0;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -121,31 +122,32 @@ class Boid
      
      if (kinematic.getSpeed() > topSpeed) 
        topSpeed = kinematic.getSpeed();
+       
+     
      
      
      
      
      float x = 10;
-     
      float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
-     if (vScaler < 0.5) {
+     
+     
+     if (vScaler < 0.5) { //if we are less than half the starting distance away, then start to decelerate
        x = -x;
        
-       if(kinematic.getSpeed() <= topSpeed/2) {
+       if(kinematic.getSpeed() <= topSpeed/2) { //if we reach the minimum threshold speed for this radius, stop decelerating
          x = 0;
        }
      } 
-     if(vScaler < 0.1) {
+     
+     
+     if(vScaler < 0.1) { //if we are less than 10% of the original distance away, decelerate even further
        x = -25;
-       if(kinematic.getSpeed() <= topSpeed/5)
+       if(kinematic.getSpeed() <= topSpeed/5) //if we reach the minimum threshold speed for this radius, stop decelerating
          x=0;
      }
        movement = acceleration * dt * x;
          
-     
-     
-     
-     
      System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
@@ -184,6 +186,8 @@ class Boid
          
          float waypointAngle = atan2((float)waypointX, (float)waypointY);
          if(distance < 0.05) { //if we are near the current target and there is a next target
+           topSpeed = 0;
+           initialTargetDistance = 0;
            target = path.get(1);
            path.remove(0);
          }

@@ -20,7 +20,12 @@ class NavMesh
 {   
    void bake(Map map)
    {
-       /// generate the graph you need for pathfinding
+     System.out.println("hello");
+     
+      for(int i = 0; i < map.walls.size() ; i++) {
+        System.out.println("hello");
+      }
+      
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)

@@ -18,20 +18,21 @@ class Node
 
 class NavMesh
 {   
+   ArrayList<Integer> reflexAngles = new ArrayList<Integer>();
+   ArrayList<Wall> navMeshWalls = new ArrayList<Wall>();
    void bake(Map map)
    {
-     
-     ArrayList<Integer> reflexAngles = new ArrayList<Integer>();
-     System.out.println(map.walls.size());
      
       for(int i = 0; i < map.walls.size() - 1; i++) { //<>//
           float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction);
           System.out.println(direction);
-          if(direction >0) {
+          
+          if(direction > 0) { //if the dot product is positive, then the angle between the edges is reflex
             reflexAngles.add(i); 
+            navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(i-1).start));
           }
       }
-      
+    
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -50,5 +51,8 @@ class NavMesh
    void draw()
    {
       /// use this to draw the nav mesh graph
+      for(int i = 0; i < navMeshWalls.size(); i++) {
+        line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
+      }
    }
 }

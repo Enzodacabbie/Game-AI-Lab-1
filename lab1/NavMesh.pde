@@ -18,19 +18,44 @@ class Node
 
 class NavMesh
 {   
-   ArrayList<Integer> reflexAngles = new ArrayList<Integer>();
-   ArrayList<Wall> navMeshWalls = new ArrayList<Wall>();
+   ArrayList<Integer> reflexAngles;
+   ArrayList<Wall> navMeshWalls; 
    void bake(Map map)
    {
+     reflexAngles  = new ArrayList<Integer>();
+     navMeshWalls = new ArrayList<Wall>();
      
-      for(int i = 0; i < map.walls.size() - 1; i++) { //<>//
-          float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction);
-          System.out.println(direction);
-          
-          if(direction > 0) { //if the dot product is positive, then the angle between the edges is reflex
-            reflexAngles.add(i); 
-            navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(i-1).start));
-          }
+     for(int i = 0; i < map.walls.size() - 1; i++)  //<>//
+     { //we do not need to check the last edge as it is the bottom left corner
+       float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction); //get dot product of the current edge normal to the next edge
+       
+       if(direction > 0) { //if the dot product is positive, then the angle between the edges is reflex
+         reflexAngles.add(i); 
+         
+         float maxDistance = 0;
+         int targetEdge = 0;
+         for(int j = 0; j < map.walls.size(); j++) 
+         {
+           if(j != (i - 1) || j!= (i + 1)) 
+           {
+             float deltaX =  map.walls.get(j).end.x - map.walls.get(i).start.x;
+             float deltaY =  map.walls.get(j).end.y - map.walls.get(i).start.y;
+             double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+             
+             if(distance > maxDistance) 
+             {
+               maxDistance = (float)distance;
+               Wall testWall = new Wall(map.walls.get(i).end, map.walls.get(j).start);
+               if(map.collides(testWall.start, testWall.end))
+               {
+                 targetEdge = j;
+               }
+             }
+           }
+         }
+         
+         navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start));
+        }
       }
     
    }
@@ -53,6 +78,7 @@ class NavMesh
       /// use this to draw the nav mesh graph
       for(int i = 0; i < navMeshWalls.size(); i++) {
         line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
+        stroke(#eb4034);
       }
    }
 }

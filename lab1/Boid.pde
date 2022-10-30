@@ -104,7 +104,8 @@ class Boid
      double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
      
      //since the boid always moves closer to the target, the distance is largest at its initial 
-     if(distance >= initialTargetDistance) { 
+     if(distance >= initialTargetDistance) 
+     { 
        initialTargetDistance = (float)distance;
      } 
      
@@ -127,19 +128,22 @@ class Boid
      float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      
      
-     if (vScaler < 0.5) { //if we are less than half the starting distance away, then start to decelerate
+     if (vScaler < 0.5) 
+     { //if we are less than half the starting distance away, then start to decelerate
        x = -x;
        
-       if(kinematic.getSpeed() <= topSpeed/2) { //if we reach the minimum threshold speed for this radius, stop decelerating
+       if(kinematic.getSpeed() <= topSpeed/2) 
+       { //if we reach the minimum threshold speed for this radius, stop decelerating
          x = 0;
        }
      } 
      
      
-     if(vScaler < 0.1) { //if we are less than 10% of the original distance away, decelerate even further
+     if(vScaler < 0.1) 
+     { //if we are less than 10% of the original distance away, decelerate even further
        x = -25;
        if(kinematic.getSpeed() <= topSpeed/5) //if we reach the minimum threshold speed for this radius, stop decelerating
-         x=0;
+         x = 0;
      }
        movement = acceleration * dt * x;
          
@@ -173,17 +177,17 @@ class Boid
        //when the target is reached, removed the first element
        
        //if there is a waypoint after current target
-       if(path.get(1) != null)
+       if(path.size() > 1)
        {
          //calculate the angle between the current target and next target
          double waypointX = target.x - path.get(1).x;
          double waypointY = target.y - path.get(1).y;
          
          float waypointAngle = atan2((float)waypointX, (float)waypointY);
-         if(distance < 0.05) { //if we are near the current target and there is a next target
+         if(distance < 10) { //if we are near the current target and there is a next target
            topSpeed = 0;
            initialTargetDistance = 0;
-           target = path.get(1);
+           this.target = path.get(1);
            path.remove(0);
          }
          

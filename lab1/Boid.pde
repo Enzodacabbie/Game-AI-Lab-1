@@ -113,7 +113,7 @@ class Boid
      //ratio of distance left to travel over the total distance needed to be travelled
      float vScaler = (float)distance/initialTargetDistance; 
      //ratio of requiredAngle left to turn over pi
-     float rScaler = requiredRotation/PI; 
+     float rScaler = PI/requiredRotation; 
     
      /**  
      if(distance <= initialTargetDistance/2) { //if we are closer than half the distance, begin to decelerate
@@ -162,7 +162,8 @@ class Boid
      {
        kinematic.increaseSpeed(movement, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
      }
-     if(distance <= 5) {
+     if(distance <= 5) 
+     {
         kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
         topSpeed = 0;
         initialTargetDistance = 0;
@@ -186,13 +187,13 @@ class Boid
          float waypointAngle = atan2((float)waypointX, (float)waypointY);
          float waypointRotation = normalize_angle_left_right(waypointAngle - kinematic.getHeading());
          
-         if(distance < 10) { //if we are near the current target and there is a next target
+         if(distance < 10) 
+         { //if we are near the current target and there is a next target
            topSpeed = 0;
            initialTargetDistance = 0;
            this.target = path.get(1);
            path.remove(0);
          }
-         
          
        }
        

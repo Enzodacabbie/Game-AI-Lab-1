@@ -123,11 +123,6 @@ class Boid
      if (kinematic.getSpeed() > topSpeed) 
        topSpeed = kinematic.getSpeed();
        
-     
-     
-     
-     
-     
      float x = 10;
      float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      

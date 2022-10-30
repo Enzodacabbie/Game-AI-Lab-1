@@ -20,10 +20,16 @@ class NavMesh
 {   
    void bake(Map map)
    {
-     System.out.println("hello");
      
-      for(int i = 0; i < map.walls.size() ; i++) {
-        System.out.println("hello");
+     ArrayList<Integer> reflexAngles = new ArrayList<Integer>();
+     System.out.println(map.walls.size());
+     
+      for(int i = 0; i < map.walls.size() - 1; i++) { //<>//
+          float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction);
+          System.out.println(direction);
+          if(direction >0) {
+            reflexAngles.add(i); 
+          }
       }
       
    }

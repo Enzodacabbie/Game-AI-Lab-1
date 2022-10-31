@@ -19,7 +19,8 @@ class Node
 class NavMesh
 {   
    ArrayList<Integer> reflexAngles;
-   ArrayList<Wall> navMeshWalls; 
+   ArrayList<Wall> navMeshWalls;
+   
    void bake(Map map)
    {
      reflexAngles  = new ArrayList<Integer>();
@@ -29,14 +30,15 @@ class NavMesh
      { //we do not need to check the last edge as it is the bottom left corner
        float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction); //get dot product of the current edge normal to the next edge
        
-       if(direction > 0) { //if the dot product is positive, then the angle between the edges is reflex
+       if(direction > 0) 
+       { //if the dot product is positive, then the angle between the edges is reflex
          reflexAngles.add(i); 
          
          float maxDistance = 0;
          int targetEdge = 0;
          for(int j = 0; j < map.walls.size(); j++) 
          {
-           if(j != (i) && j!= (i + 2)) //do not check neighboring vertices
+           if(j != i && j!= (i + 2)) //do not check neighboring vertices
            {
              float deltaX =  map.walls.get(j).start.x - map.walls.get(i).end.x;
              float deltaY =  map.walls.get(j).start.y - map.walls.get(i).end.y;
@@ -47,10 +49,16 @@ class NavMesh
              PVector testEnd = PVector.add(testWall.end, PVector.mult(testWall.direction, -0.05));
              testWall = new Wall(testStart, testEnd);
              
-             if(distance > maxDistance && map.collides(testWall.start, testWall.end)==false && isPointInPolygon(testWall.center(), map.walls) == true) 
+             if(distance > maxDistance && !map.collides(testWall.start, testWall.end) && isPointInPolygon(testWall.center(), map.walls)) 
              {
-               maxDistance = (float)distance;
-               targetEdge = j; //set target vertex as the furthest one without crossing the walls
+               for(Wall w : navMeshWalls)
+                 {
+                   if(!testWall.crosses(w.start, w.end)) //<>//
+                   {
+                     maxDistance = (float)distance;
+                     targetEdge = j;
+                   }
+                 }
              }
            }
          }

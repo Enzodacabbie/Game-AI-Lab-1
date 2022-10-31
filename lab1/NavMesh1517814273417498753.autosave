@@ -1,0 +1,87 @@
+// Useful to sort lists by a custom key
+import java.util.Comparator;
+
+
+/// In this file you will implement your navmesh and pathfinding. 
+
+/// This node representation is just a suggestion
+class Node
+{
+   int id;
+   ArrayList<Wall> polygon;
+   PVector center;
+   ArrayList<Node> neighbors;
+   ArrayList<Wall> connections;
+}
+
+
+
+class NavMesh
+{   
+   ArrayList<Integer> reflexAngles;
+   ArrayList<Wall> navMeshWalls; 
+   
+   void bake(Map map)
+   {
+     reflexAngles  = new ArrayList<Integer>();
+     navMeshWalls = new ArrayList<Wall>();
+     System.out.println(map.walls.size());
+     for(int i = 0; i < map.walls.size() - 1; i++) 
+     { //we do not need to check the last edge as it is the bottom left corner
+       float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction); //get dot product of the current edge normal to the next edge
+       
+       if(direction > 0) { //if the dot product is positive, then the angle between the edges is reflex
+         reflexAngles.add(i); 
+         
+         float maxDistance = 0;
+         int targetEdge = 0;
+         for(int j = 0; j < map.walls.size(); j++) 
+         {
+           
+           if(j != (i) && j != (i+2)) 
+           {
+             float deltaX =  map.walls.get(i).end.x - map.walls.get(j).start.x;
+             float deltaY =  map.walls.get(i).end.y - map.walls.get(j).start.y;
+             double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+             Wall testWall = new Wall(new PVector(map.walls.get(j).end.x-10,map.walls.get(j).end.y-10), new PVector(map.walls.get(i).start.x-10,map.walls.get(i).start.y-10));
+             
+             float test = map.walls.get(i).normal.dot(testWall.direction);
+             if(distance > maxDistance && !map.collides(testWall.start, testWall.end)) 
+             {
+               maxDistance = (float)distance;
+               targetEdge = j;   
+             }
+           }
+         }
+         //map.walls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start));
+         navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start));
+        }
+      }
+    
+   }
+   
+   ArrayList<PVector> findPath(PVector start, PVector destination)
+   {
+      /// implement A* to find a path
+      ArrayList<PVector> result = null;
+      return result;
+   }
+   
+   
+   void update(float dt)
+   {
+      draw();
+   }
+   
+   void draw()
+   {
+     
+      /// use this to draw the nav mesh graph
+      for(int i = 0; i < navMeshWalls.size(); i++) {
+        System.out.println(navMeshWalls.size());
+        stroke(#eb4034);
+        line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
+        
+      }
+   }
+}

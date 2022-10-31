@@ -14,6 +14,20 @@ class Node
    ArrayList<Wall> connections;
 }
 
+class NavMeshEdge
+{
+  Wall wall;
+  int origin;
+  int end;
+  
+  NavMeshEdge(Wall w, int o, int e) 
+  {
+    wall = w;
+    origin = o;
+    end = e;
+  }
+} //<>//
+
 
 
 class NavMesh
@@ -22,13 +36,15 @@ class NavMesh
    ArrayList<Integer> reflexAngles;
    
    //contains the walls added when creating the navmesh
-   ArrayList<Wall> navMeshWalls;
+   ArrayList<NavMeshEdge> navMeshWalls;
    
+   ArrayList<ArrayList<Wall>> polygons;
    void bake(Map map)
    {
      
      reflexAngles  = new ArrayList<Integer>();
-     navMeshWalls = new ArrayList<Wall>();
+     navMeshWalls = new ArrayList<NavMeshEdge>();
+     polygons = new ArrayList<ArrayList<Wall>>();
      
      for(int i = 0; i < map.walls.size()-1; i++)  //<>//
      { //we do not need to check the last edge as it is the bottom left corner
@@ -68,9 +84,9 @@ class NavMesh
                {
                  boolean clean = true;
                  
-                 for(Wall w : navMeshWalls)
+                 for(NavMeshEdge w : navMeshWalls)
                  {
-                   if(testWall.crosses(w.start, w.end)) 
+                   if(testWall.crosses(w.wall.start, w.wall.end)) 
                    {
                      clean = false;
                    }
@@ -91,7 +107,11 @@ class NavMesh
          //finished looking through all the walls and found the vertex with the further distance that is connectable
          Wall addWall = new Wall(map.walls.get(targetEdge).start, map.walls.get(i).end);
          addWall.index = map.walls.size()-1 + navMeshWalls.size();
-         navMeshWalls.add(addWall); //<>//
+         NavMeshEdge nmEdge = new NavMeshEdge(addWall, targetEdge, i);
+         
+         navMeshWalls.add(nmEdge); //<>//
+         
+         
          
          //check if the angle is still reflex with the new wall
          float d = addWall.normal.dot(map.walls.get(i+1).direction);
@@ -99,7 +119,7 @@ class NavMesh
          if(d > 0) 
          {
            //if the dot between the new wall and the 
-           stillReflex = true;
+           stillReflex = false;
            System.out.println("still reflex at: " + i);
          }
          
@@ -137,9 +157,9 @@ class NavMesh
                  {
                    boolean clean = true;
                  
-                   for(Wall w : navMeshWalls)
+                   for(NavMeshEdge w : navMeshWalls)
                    {
-                     if(testWall.crosses(w.start, w.end)) 
+                     if(testWall.crosses(w.wall.start, w.wall.end)) 
                      {
                        clean = false;
                      }
@@ -160,7 +180,9 @@ class NavMesh
            
            Wall wall = new Wall(map.walls.get(target).start, map.walls.get(i).end);
            wall.index = map.walls.size()-1 + navMeshWalls.size();
-           navMeshWalls.add(wall);
+           
+           NavMeshEdge nmEdge2 = new NavMeshEdge(wall,target, i);
+           navMeshWalls.add(nmEdge2);
                      
          }
            
@@ -175,6 +197,15 @@ class NavMesh
         */
       }
     
+   }
+   
+   int getIndex(ArrayList<Wall> walls, int index) 
+   {
+     if (index >= walls.size()) 
+       index = index % walls.size();
+      else if(index < 0)
+        index = index % walls.size() + walls.size();
+      return index;
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -195,7 +226,7 @@ class NavMesh
       /// use this to draw the nav mesh graph
       for(int i = 0; i < navMeshWalls.size(); i++) {
         stroke(#eb4034);
-        line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
+        line(navMeshWalls.get(i).wall.start.x, navMeshWalls.get(i).wall.start.y, navMeshWalls.get(i).wall.end.x, navMeshWalls.get(i).wall.end.y);
         //stroke(#eb4034);
       }
    }

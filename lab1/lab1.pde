@@ -13,7 +13,7 @@ NavMesh nm = new NavMesh();
 
 boolean entering_path = false;
 
-boolean show_nav_mesh = false;
+boolean show_nav_mesh = true;
 
 boolean show_waypoints = false;
 

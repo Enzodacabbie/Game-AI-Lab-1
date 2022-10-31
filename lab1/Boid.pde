@@ -112,7 +112,7 @@ class Boid
      
      //ratio of distance left to travel over the total distance needed to be travelled
      float vScaler = (float)distance/initialTargetDistance; 
-     //ratio of requiredAngle left to turn over pi
+     //ratio of requiredRotation left to turn in relation to PI
      float rScaler = PI/requiredRotation; 
     
      /**  
@@ -147,7 +147,7 @@ class Boid
      }
        movement = acceleration * dt * x;
          
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed + ", " + rScaler);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {

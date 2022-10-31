@@ -51,19 +51,38 @@ class NavMesh
              
              if(distance > maxDistance && !map.collides(testWall.start, testWall.end) && isPointInPolygon(testWall.center(), map.walls)) 
              {
-               for(Wall w : navMeshWalls)
+               if(navMeshWalls.size() == 0) 
+               {
+                 System.out.println("true 1");
+                 maxDistance = (float)distance;
+                 targetEdge = j;
+               }
+               else 
+               {
+                 boolean clean = true;
+                 System.out.println(navMeshWalls.size());
+                 for(Wall w : navMeshWalls)
                  {
-                   if(!testWall.crosses(w.start, w.end)) //<>//
+                   if(testWall.crosses(w.start, w.end)) 
                    {
-                     maxDistance = (float)distance;
-                     targetEdge = j;
+                     clean = false;
                    }
                  }
+                 
+                 if(clean == true)
+                 {
+                   System.out.println("true 2");
+                   maxDistance = (float)distance;
+                   targetEdge = j;
+                 }
+                 
+               }
+                 
+               
              }
            }
          }
-         
-         navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start));
+         navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start)); //<>//
         }
       }
     

@@ -45,11 +45,11 @@ class NavMesh
         nodes.add(w.start);
       }
       System.out.println("before: " + nodes.size());
-      earTrimming(nodes); 
+      earTrimming(nodes, 0); 
       System.out.println("done");
    }
    
-   boolean earTrimming(ArrayList<PVector> nodes) 
+   boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
    {
      if(nodes.size() == 3)
      {
@@ -65,7 +65,7 @@ class NavMesh
      }
      
      AddPolygon(currentMap.walls , n);
-     reflexVerts = recalculateReflex(currentMap, reflexVerts);
+     recalculateReflex(currentMap, reflexVerts, iteration);
      
      for(int k = 0; k <  reflexVerts.size(); k++)
      {
@@ -79,31 +79,40 @@ class NavMesh
        for(int i = 0;  i < currentMap.walls.size(); i++)
        {
          
-         if(!reflexVerts.contains(currentMap.walls.get(i)))
+         if(!reflexVerts.contains(i))
          {
-           //System.out.println(i);
+
            ArrayList<Wall> polygon = new ArrayList<Wall>();
            polygon.add(getNeighbour(currentMap.walls, i-1));
            polygon.add(getNeighbour(currentMap.walls, i));
            polygon.add(new Wall(getNeighbour(currentMap.walls, i-1).start, getNeighbour(currentMap.walls, i+1).start)); //<>//
            
-           
-           //navMeshWalls.add(new Wall(getNeighbour(copyMap.walls, i-1).start, getNeighbour(copyMap.walls, i+1).start));
-           
-           //System.out.println(nodes.size());
-           if(validEar(polygon, n, (i-1), i, (i+1))) //<>//
+          
+           if(validEar(polygon, n, (i-1), i, (i+1)))
            {
              System.out.println("Making ear using: " + (i-1) + "  " + i + " " + (i+1));
-             //remove the vertex as it has been remove with the ear
+             //remove the vertex as it has been remove with the ear //<>//
              
-             nodes.remove(i);
+             //nodes.remove(i);
+             ArrayList<PVector> nds = new ArrayList<PVector>();
+             //rearrange nodes such that 
+             for(int k = 0; k < nodes.size() ; k++) 
+             {
+               if(k != i) 
+               {
+                 nds.add(nodes.get(getIndex(currentMap.walls, k )));
+                 System.out.print(" " + getIndex(currentMap.walls, k ));
+               }
+             }
+             System.out.println();
+             nodes = nds;
              graph.add(polygon); //<>//
              break; //<>//
            }
          }
        }
       
-     return earTrimming(nodes);
+     return earTrimming(nodes, ++iteration);
    }
    
    
@@ -116,6 +125,16 @@ class NavMesh
      return walls.get(index);
    }
    
+   int getIndex(ArrayList<Wall> walls, int index) 
+   {
+     if(index >= walls.size())
+       index = index % walls.size();
+     else if(index < 0)
+       index = index % walls.size() + walls.size();
+     
+     return index;
+   }
+   
    int loopIndex(ArrayList<Wall> walls, int ind)
    {
      if(ind >= walls.size())
@@ -125,25 +144,38 @@ class NavMesh
       return ind;
    }
    
-   ArrayList recalculateReflex(Map tempMap, ArrayList<Integer> reflexVerts) 
+   ArrayList recalculateReflex(Map tempMap, ArrayList<Integer> reflexVerts, int iteration) 
    {
      reflexVerts.clear();
+     //System.out.println(tempMap.walls.size());
      for(int i = 0; i < tempMap.walls.size(); i++) 
      {
-       float direction = tempMap.walls.get(i).normal.dot(getNeighbour(tempMap.walls, i+1).direction); //get dot product of the current edge normal to the next edge
+       float direction;
+       if(iteration == 0) 
+       {
+         
+         direction = tempMap.walls.get(i).normal.dot(getNeighbour(tempMap.walls, i+1).direction);
+       }
+       else
+       {
+         direction = getNeighbour(tempMap.walls, i-1).normal.dot(tempMap.walls.get(i).direction); //get dot product of the current edge normal to the next edge
       
+       }
+        
        if(direction > 0) 
        { //if the dot product is positive, then the angle between the edges is reflex
          reflexVerts.add(i); 
-        
        }
+     
        
-       for(int k = 0; k < reflexVerts.size(); k++)
+
+     }
+     System.out.print("Reflex Vertices: ");
+     for(int k = 0; k < reflexVerts.size(); k++)
        {
          System.out.print(" " + reflexVerts.get(k));
        }
-       
-     }
+     System.out.println();
      
      return reflexVerts;
    }

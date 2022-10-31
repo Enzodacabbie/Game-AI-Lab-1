@@ -147,7 +147,7 @@ class Boid
      }
        movement = acceleration * dt * x;
          
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
+     //System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {

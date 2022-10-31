@@ -25,7 +25,7 @@ class NavMesh
      reflexAngles  = new ArrayList<Integer>();
      navMeshWalls = new ArrayList<Wall>();
      
-     for(int i = 0; i < map.walls.size() - 1; i++)  //<>//
+     for(int i = 0; i < map.walls.size()-1; i++)  //<>//
      { //we do not need to check the last edge as it is the bottom left corner
        float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction); //get dot product of the current edge normal to the next edge
        
@@ -36,20 +36,21 @@ class NavMesh
          int targetEdge = 0;
          for(int j = 0; j < map.walls.size(); j++) 
          {
-           if(j != (i - 1) || j!= (i + 1)) 
+           if(j != (i) && j!= (i + 2)) //do not check neighboring vertices
            {
-             float deltaX =  map.walls.get(j).end.x - map.walls.get(i).start.x;
-             float deltaY =  map.walls.get(j).end.y - map.walls.get(i).start.y;
-             double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+             float deltaX =  map.walls.get(j).start.x - map.walls.get(i).end.x;
+             float deltaY =  map.walls.get(j).start.y - map.walls.get(i).end.y;
+             double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY)); //calculate distance between current vertex and other vertices
              
-             if(distance > maxDistance) 
+             Wall testWall = new Wall(map.walls.get(i).end, map.walls.get(j).start);
+             PVector testStart = PVector.add(testWall.start, PVector.mult(testWall.direction, 0.05));
+             PVector testEnd = PVector.add(testWall.end, PVector.mult(testWall.direction, -0.05));
+             testWall = new Wall(testStart, testEnd);
+             
+             if(distance > maxDistance && map.collides(testWall.start, testWall.end)==false && isPointInPolygon(testWall.center(), map.walls) == true) 
              {
                maxDistance = (float)distance;
-               Wall testWall = new Wall(map.walls.get(i).end, map.walls.get(j).start);
-               if(map.collides(testWall.start, testWall.end))
-               {
-                 targetEdge = j;
-               }
+               targetEdge = j; //set target vertex as the furthest one without crossing the walls
              }
            }
          }
@@ -77,8 +78,9 @@ class NavMesh
    {
       /// use this to draw the nav mesh graph
       for(int i = 0; i < navMeshWalls.size(); i++) {
-        line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
         stroke(#eb4034);
+        line(navMeshWalls.get(i).start.x, navMeshWalls.get(i).start.y, navMeshWalls.get(i).end.x, navMeshWalls.get(i).end.y);
+        //stroke(#eb4034);
       }
    }
 }

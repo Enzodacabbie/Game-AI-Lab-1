@@ -23,12 +23,14 @@ class NavMesh
    
    void bake(Map map)
    {
+     
      reflexAngles  = new ArrayList<Integer>();
      navMeshWalls = new ArrayList<Wall>();
      
      for(int i = 0; i < map.walls.size()-1; i++)  //<>//
      { //we do not need to check the last edge as it is the bottom left corner
        float direction = map.walls.get(i).normal.dot(map.walls.get(i+1).direction); //get dot product of the current edge normal to the next edge
+       map.walls.get(i).index = i;
        
        if(direction > 0) 
        { //if the dot product is positive, then the angle between the edges is reflex
@@ -53,14 +55,14 @@ class NavMesh
              {
                if(navMeshWalls.size() == 0) 
                {
-                 System.out.println("true 1");
+                 
                  maxDistance = (float)distance;
                  targetEdge = j;
                }
                else 
                {
                  boolean clean = true;
-                 System.out.println(navMeshWalls.size());
+                 
                  for(Wall w : navMeshWalls)
                  {
                    if(testWall.crosses(w.start, w.end)) 
@@ -71,19 +73,35 @@ class NavMesh
                  
                  if(clean == true)
                  {
-                   System.out.println("true 2");
+                   
                    maxDistance = (float)distance;
                    targetEdge = j;
-                 }
-                 
+                 } 
                }
-                 
                
              }
            }
          }
-         navMeshWalls.add(new Wall(map.walls.get(i).end, map.walls.get(targetEdge).start)); //<>//
+         Wall addWall = new Wall(map.walls.get(targetEdge).start, map.walls.get(i).end);
+         addWall.index = map.walls.size()-1 + navMeshWalls.size();
+         navMeshWalls.add(addWall); //<>//
+         
+         float d = addWall.normal.dot(map.walls.get(i+1).direction);
+         boolean stillReflex = false;
+         if(d > 0) 
+         {
+           stillReflex = true;
+         }
+           
         }
+        
+        //create polygons
+        /**
+        for(Wall w in navMeshWalls) 
+        {
+          
+        }
+        */
       }
     
    }

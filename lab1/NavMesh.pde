@@ -57,7 +57,7 @@ class NavMesh
        { //if the dot product is positive, then the angle between the edges is reflex
          reflexAngles.add(i); 
          
-         float maxDistance = 0;
+         float maxDistance = 999;
          int targetEdge = 0;
          for(int j = 0; j < map.walls.size(); j++) 
          {
@@ -72,7 +72,7 @@ class NavMesh
              PVector testEnd = PVector.add(testWall.end, PVector.mult(testWall.direction, -0.05));
              testWall = new Wall(testStart, testEnd);
              
-             if(distance > maxDistance && !map.collides(testWall.start, testWall.end) && isPointInPolygon(testWall.center(), map.walls)) 
+             if(distance < maxDistance && !map.collides(testWall.start, testWall.end) && isPointInPolygon(testWall.center(), map.walls)) 
              {
                if(navMeshWalls.size() == 0) 
                {
@@ -115,17 +115,18 @@ class NavMesh
          
          //check if the angle is still reflex with the new wall
          float d = addWall.normal.dot(map.walls.get(i+1).direction);
+         float d2 = map.walls.get(i+1).normal.dot(addWall.direction);
          boolean stillReflex = false;
-         if(d > 0) 
+         if(d > 0 || d2 >= 0) 
          {
            //if the dot between the new wall and the 
-           stillReflex = false;
+           stillReflex = true;
            System.out.println("still reflex at: " + i);
          }
          
          if(stillReflex == true) 
          {
-           float minDistance = 999;
+           float minDistance = 0;
            int target = 0;
            
            System.out.println("here");
@@ -137,14 +138,14 @@ class NavMesh
                float deltaY =  map.walls.get(j).start.y - map.walls.get(i).end.y;
                double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY)); //calculate distance between current vertex and other vertices
              
-               Wall testWall = new Wall(map.walls.get(i).end, map.walls.get(j).start);
-               PVector testStart = PVector.add(testWall.start, PVector.mult(testWall.direction, 0.05));
-               PVector testEnd = PVector.add(testWall.end, PVector.mult(testWall.direction, -0.05));
-               testWall = new Wall(testStart, testEnd);
+               Wall test = new Wall(map.walls.get(i).end, map.walls.get(j).start);
+               PVector testStart = PVector.add(test.start, PVector.mult(test.direction, 0.05));
+               PVector testEnd = PVector.add(test.end, PVector.mult(test.direction, -0.05));
+               test = new Wall(testStart, testEnd);
                System.out.println("here1");
 
              
-               if(distance < minDistance && !map.collides(testWall.start, testWall.end) && isPointInPolygon(testWall.center(), map.walls)) 
+               if(distance > minDistance && !map.collides(test.start, test.end) && isPointInPolygon(test.center(), map.walls)) 
                {
                  System.out.println("here 2");
                  if(navMeshWalls.size() == 0) 
@@ -159,7 +160,7 @@ class NavMesh
                  
                    for(NavMeshEdge w : navMeshWalls)
                    {
-                     if(testWall.crosses(w.wall.start, w.wall.end)) 
+                     if(test.crosses(w.wall.start, w.wall.end)) 
                      {
                        clean = false;
                      }

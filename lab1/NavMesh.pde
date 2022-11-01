@@ -26,7 +26,7 @@ class NavMesh
    //calculate the NavMesh using EarTrimming method
    void bake(Map map)
    {
-     Map mapCopy = map;
+     Map mapCopy = map; //<>//
      reflexAngles  = new ArrayList<Integer>();
      navMeshWalls = new ArrayList<Wall>(); //<>//
      graph = new ArrayList<ArrayList<Wall>>();
@@ -46,15 +46,12 @@ class NavMesh
       }
       System.out.println("before: " + nodes.size());
       earTrimming(nodes, 0); 
-      System.out.println("done");
+      System.out.println("done"); //<>//
    }
    
    boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
    {
-     if(nodes.size() == 3)
-     {
-       return true;
-     }
+     
        
      ArrayList reflexVerts = new ArrayList<Integer>();
      Map currentMap = new Map();
@@ -64,19 +61,18 @@ class NavMesh
        n[j] = nodes.get(j);
      }
      
+     if(nodes.size() == 3)
+     {
+       ArrayList<Wall> polygon = new ArrayList<Wall>();
+       AddPolygon(polygon, n);
+       graph.add(polygon);
+       return true; 
+     }
+     
      AddPolygon(currentMap.walls , n);
      recalculateReflex(currentMap, reflexVerts, iteration);
      
-     for(int k = 0; k <  reflexVerts.size(); k++)
-     {
-       //System.out.println(reflexVerts.get(k));
-     }
-     
-     
-     //we are assuming that the map given is sufficient for earTrimming
-     //verts.length == 3 when there is only one triangle remaining in the map
-     
-       for(int i = 0;  i < currentMap.walls.size(); i++)
+     for(int i = 0;  i < currentMap.walls.size(); i++)
        {
          
          if(!reflexVerts.contains(i))
@@ -85,34 +81,36 @@ class NavMesh
            ArrayList<Wall> polygon = new ArrayList<Wall>();
            polygon.add(getNeighbour(currentMap.walls, i-1));
            polygon.add(getNeighbour(currentMap.walls, i));
-           polygon.add(new Wall(getNeighbour(currentMap.walls, i-1).start, getNeighbour(currentMap.walls, i+1).start)); //<>//
+           polygon.add(new Wall(getNeighbour(currentMap.walls, i-1).start, getNeighbour(currentMap.walls, i+1).start));
            
           
            if(validEar(polygon, n, (i-1), i, (i+1)))
            {
              System.out.println("Making ear using: " + (i-1) + "  " + i + " " + (i+1));
-             //remove the vertex as it has been remove with the ear //<>//
              
-             //nodes.remove(i);
              ArrayList<PVector> nds = new ArrayList<PVector>();
-             //rearrange nodes such that 
+             
+             //remove the index from the array of nodes that make up the map
              for(int k = 0; k < nodes.size() ; k++) 
              {
                if(k != i) 
                {
+                 //add all nodes that are not the node that was removed
                  nds.add(nodes.get(getIndex(currentMap.walls, k )));
-                 System.out.print(" " + getIndex(currentMap.walls, k ));
                }
              }
-             System.out.println();
              nodes = nds;
-             graph.add(polygon); //<>//
-             break; //<>//
+             graph.add(polygon);
+             break;
            }
          }
        }
       
-     return earTrimming(nodes, ++iteration);
+     //recursively call the function by
+     //reducing the number of nodes by one each time
+     //until we are left with three nodes remaining
+     return earTrimming(nodes, ++iteration);   
+        //<>// //<>// //<>// //<>// //<>//
    }
    
    
@@ -187,6 +185,8 @@ class NavMesh
      System.out.println(n.length);
      for(int i = 0; i < n.length; i++)
      {
+       
+       //skip the points that make up the ear being checked
        if(i == a)
          continue;
        if(i == b)
@@ -197,8 +197,6 @@ class NavMesh
          valid = false;
              
      }
-     if(valid == false)
-       System.out.println("doesnt work");
      
      return valid;
    }
@@ -208,6 +206,7 @@ class NavMesh
    {
       /// implement A* to find a path
       ArrayList<PVector> result = null;
+      
       return result;
    }
    

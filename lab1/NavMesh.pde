@@ -1,7 +1,5 @@
 // Useful to sort lists by a custom key
 import java.util.Comparator;
-import java.util.*;
-
 
 /// In this file you will implement your navmesh and pathfinding. 
 
@@ -15,10 +13,9 @@ class Node
    ArrayList<Wall> connections;
 }
 
-
-
 class NavMesh
-{   
+{  
+   
    ArrayList<Integer> reflexAngles;
    ArrayList<Wall> navMeshWalls; 
    ArrayList<ArrayList<Wall>> graph;
@@ -44,23 +41,25 @@ class NavMesh
       {
         nodes.add(w.start);
       }
-      System.out.println("before: " + nodes.size());
+      
       earTrimming(nodes, 0); 
       System.out.println("done"); //<>//
    }
    
    boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
    {
-     
-       
      ArrayList reflexVerts = new ArrayList<Integer>();
      Map currentMap = new Map();
      
+     //copy arrayList of vertices into static array
+     //this will be used to create new polygon based on the vertices
      PVector[] n = new PVector[nodes.size()];
      for(int j = 0; j < nodes.size(); j++){
        n[j] = nodes.get(j);
      }
      
+     //if nodes == 3, we are at the last triangle
+     //store the triangle and return
      if(nodes.size() == 3)
      {
        ArrayList<Wall> polygon = new ArrayList<Wall>();
@@ -69,25 +68,36 @@ class NavMesh
        return true; 
      }
      
+     //create map based off of the vertices given
      AddPolygon(currentMap.walls , n);
+     
+     //calculate the reflex vertices of the generated map
      recalculateReflex(currentMap, reflexVerts, iteration);
      
+     //go through all of the vertices
+     //if vertex is not reflex, create a triangle with the edges from i-1 and i+1 and the conncection of i-1 and i+1
+     //if none of the other vertices lie inside this new triangle,
+     //add this triangle to navmesh graph and remove the vertex used to create the triangle
+     //recursively call this method with the vertices minus the one removed
      for(int i = 0;  i < currentMap.walls.size(); i++)
        {
-         
+         //if the current vertex is not reflex
          if(!reflexVerts.contains(i))
          {
-
+           //create new triangle (ear) to check
            ArrayList<Wall> polygon = new ArrayList<Wall>();
            polygon.add(getNeighbour(currentMap.walls, i-1));
            polygon.add(getNeighbour(currentMap.walls, i));
            polygon.add(new Wall(getNeighbour(currentMap.walls, i-1).start, getNeighbour(currentMap.walls, i+1).start));
-           
           
+           //if none of the other vertices lie within this triangle
+           //add the triangle to the navmesh and remove the vertex used
            if(validEar(polygon, n, (i-1), i, (i+1)))
            {
              System.out.println("Making ear using: " + (i-1) + "  " + i + " " + (i+1));
              
+             //arraylist will store the new set of vertices minus the vertex removed
+             //it will be used as input into the recursive call
              ArrayList<PVector> nds = new ArrayList<PVector>();
              
              //remove the index from the array of nodes that make up the map
@@ -109,8 +119,9 @@ class NavMesh
      //recursively call the function by
      //reducing the number of nodes by one each time
      //until we are left with three nodes remaining
-     return earTrimming(nodes, ++iteration);   
-        //<>// //<>// //<>// //<>// //<>//
+     //iteration is incremented as the way for calculating reflex vertices is different 
+     //only for the very first iteration
+     return earTrimming(nodes, ++iteration);    //<>// //<>// //<>// //<>// //<>//
    }
    
    
@@ -145,7 +156,7 @@ class NavMesh
    ArrayList recalculateReflex(Map tempMap, ArrayList<Integer> reflexVerts, int iteration) 
    {
      reflexVerts.clear();
-     //System.out.println(tempMap.walls.size());
+
      for(int i = 0; i < tempMap.walls.size(); i++) 
      {
        float direction;
@@ -178,11 +189,10 @@ class NavMesh
      return reflexVerts;
    }
    
-   
+   //checks if any elements of a set of PVectors lays inside a given polygon
    boolean validEar(ArrayList<Wall> polygon, PVector[] n, int a, int b, int c)
    {
      boolean valid = true;
-     System.out.println(n.length);
      for(int i = 0; i < n.length; i++)
      {
        
@@ -193,6 +203,8 @@ class NavMesh
          continue;
        if(i == c)
          continue;
+         
+       //if a single point is inside the polygon, then the ear is not valid
        if(isPointInPolygon(n[i], polygon))
          valid = false;
              
@@ -218,9 +230,6 @@ class NavMesh
    
    void draw()
    {
-      /// use this to draw the nav mesh graph
-     
-      
       for(int i = 0; i < graph.size(); i++) 
       {
         for(int j = 0; j < graph.get(i).size(); j++)

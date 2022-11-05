@@ -11,6 +11,66 @@ class Node
    PVector center;
    ArrayList<Node> neighbors;
    ArrayList<Wall> connections;
+   ArrayList<PVector> vertices;
+   
+   Node previousNode;
+   float distanceTraveled;
+   float heuristic;
+   float totalCost;
+   
+   Node(ArrayList<Wall> walls, int ID) 
+   {
+     id = ID;
+     polygon = walls;
+     center = getCenter();
+     neighbors = new ArrayList<Node>();
+     connections = new ArrayList<Wall>();
+     vertices = findVertices();
+   }
+   
+   Node() 
+   {
+     neighbors = new ArrayList<Node>();
+     connections = new ArrayList<Wall>();
+   }
+   
+   void createNewConnection(PVector target)
+   {
+     connections.add(new Wall(center, target));
+   }
+   
+   void addToTotalCost(float previousCost)
+   {
+     totalCost += previousCost;
+   }
+   
+   PVector getCenter() 
+   {
+     PVector cent = new PVector(); 
+     for(int i = 0; i < polygon.size(); i++)
+     {
+       cent.add(polygon.get(i).start);
+     }
+     return cent.div(3);
+   }
+   
+   ArrayList<PVector> findVertices()
+   {
+     ArrayList<PVector> verts = new ArrayList<PVector>();
+     for(int i = 0; i < polygon.size(); i++) 
+     {
+       verts.add(polygon.get(i).start);
+     }
+     System.out.println(verts.size());
+     return verts;
+   }
+   
+   void addNeighbour(Node n, PVector otherCenter) 
+   {
+     connections.add(new Wall(center, otherCenter));
+     neighbors.add(n);
+   }
+   
 }
 
 class NavMesh
@@ -19,23 +79,17 @@ class NavMesh
    ArrayList<Integer> reflexAngles;
    ArrayList<Wall> navMeshWalls; 
    ArrayList<ArrayList<Wall>> graph;
+   ArrayList<Node> graphNodes;
    
    //calculate the NavMesh using EarTrimming method
    void bake(Map map)
    {
      Map mapCopy = map; //<>//
-     reflexAngles  = new ArrayList<Integer>();
+     reflexAngles  = new ArrayList<Integer>(); //<>//
      navMeshWalls = new ArrayList<Wall>(); //<>//
-     graph = new ArrayList<ArrayList<Wall>>();
+     graph = new ArrayList<ArrayList<Wall>>(); //<>//
      ArrayList<PVector> nodes = new ArrayList<PVector>(); //<>//
-    
-      /**
-      for (int i = 0; i < mapCopy.walls.size(); i++)
-      {
-        nodes.add(mapCopy.walls.get(i).start);
-        map.walls.get(i).index = i;
-      }
-      */
+     graphNodes = new ArrayList<Node>(); //<>//
       
       for(Wall w : mapCopy.walls) 
       {
@@ -43,7 +97,8 @@ class NavMesh
       }
       
       earTrimming(nodes, 0); 
-      System.out.println("done"); //<>//
+      createNodes(graph);
+      System.out.println("done");
    }
    
    boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
@@ -121,7 +176,7 @@ class NavMesh
      //until we are left with three nodes remaining
      //iteration is incremented as the way for calculating reflex vertices is different 
      //only for the very first iteration
-     return earTrimming(nodes, ++iteration);    //<>// //<>// //<>// //<>// //<>//
+     return earTrimming(nodes, ++iteration);   
    }
    
    
@@ -134,6 +189,7 @@ class NavMesh
      return walls.get(index);
    }
    
+    //<>//
    int getIndex(ArrayList<Wall> walls, int index) 
    {
      if(index >= walls.size())
@@ -142,15 +198,6 @@ class NavMesh
        index = index % walls.size() + walls.size();
      
      return index;
-   }
-   
-   int loopIndex(ArrayList<Wall> walls, int ind)
-   {
-     if(ind >= walls.size())
-       ind = ind % walls.size();
-     else if(ind< 0)
-       ind = ind % walls.size() + walls.size();
-      return ind;
    }
    
    ArrayList recalculateReflex(Map tempMap, ArrayList<Integer> reflexVerts, int iteration) 
@@ -213,6 +260,57 @@ class NavMesh
      return valid;
    }
    
+   void createNodes(ArrayList<ArrayList<Wall>> triangles) 
+   {
+     for(int i = 0; i < triangles.size(); i++)
+     {
+       Node node = new Node(triangles.get(i), i);
+       graphNodes.add(node);
+     }
+     
+     System.out.println("node size: " + graphNodes.size());
+     
+     //go through each node, then go through again
+     for(int k = 0; k < triangles.size(); k++)
+     {
+       int counter = 0;
+       
+       for(int j = 0; j < graphNodes.size(); j++)
+       {   //<>//
+         if((graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(0).y) || 
+         (graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(1).y) || 
+         (graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(2).y)) 
+         {
+           counter = counter +1;
+         }
+         
+         if((graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(0).y) || 
+         (graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(1).y) || 
+         (graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(2).y)) 
+         {
+           counter = counter +1;
+         }
+         
+          if((graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(0).y) || 
+         (graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(1).y) || 
+         (graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(2).y)) 
+         {
+           counter = counter +1;
+         }
+          if(counter >= 2)
+         {
+         graphNodes.get(k).addNeighbour(graphNodes.get(j), graphNodes.get(j).center);
+         }
+       }
+       
+      
+     }
+     
+     
+     
+     
+   }
+   
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
@@ -238,6 +336,25 @@ class NavMesh
           line(graph.get(i).get(j).start.x, graph.get(i).get(j).start.y, graph.get(i).get(j).end.x, graph.get(i).get(j).end.y);
           
         }
-      }     
+      }
+      for(int i =0; i < graphNodes.size(); i++)
+      {
+        for(int k = 0; k < graphNodes.get(i).connections.size(); k++)
+        {
+          stroke(#ffea00);
+          line(graphNodes.get(i).center.x,graphNodes.get(i).center.y, 16, 16);
+        }
+      }
+      
+      /**
+      for(int i =0; i < graphNodes.size(); i++)
+      {
+        for(int k = 0; k < graphNodes.get(i).connections.size(); k++)
+        {
+          stroke(#ffea00);
+          line(graphNodes.get(i).connections.get(k).start.x,graphNodes.get(i).connections.get(k).start.y,graphNodes.get(i).connections.get(k).end.x,graphNodes.get(i).connections.get(k).end.y);
+        }
+      }
+      */
    }
 }

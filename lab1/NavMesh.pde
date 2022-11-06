@@ -22,10 +22,10 @@ class Node
    {
      id = ID;
      polygon = walls;
+     vertices = findVertices();
      center = getCenter();
      neighbors = new ArrayList<Node>();
      connections = new ArrayList<Wall>();
-     vertices = findVertices();
    }
    
    Node() 
@@ -44,22 +44,40 @@ class Node
      totalCost += previousCost;
    }
    
+   //calculate the center by taking the mean of the vertices
    PVector getCenter() 
    {
-     PVector cent = new PVector(); 
-     for(int i = 0; i < polygon.size(); i++)
+     PVector cent = new PVector(0,0); 
+     /**
+     for(Wall w: polygon)
      {
-       cent.add(polygon.get(i).start);
+       System.out.println(w.end.x + " " + w.start.y);
+       cent.add(w.start);
+     }
+     System.out.println("center: " +cent.x + " " + cent.y);
+     */
+     for(int i =0; i< polygon.size(); i++)
+     {
+       cent.add(polygon.get(i).center());
      }
      return cent.div(3);
    }
+   
    
    ArrayList<PVector> findVertices()
    {
      ArrayList<PVector> verts = new ArrayList<PVector>();
      for(int i = 0; i < polygon.size(); i++) 
      {
-       verts.add(polygon.get(i).start);
+       if(!verts.contains(new PVector(polygon.get(i).start.x, polygon.get(i).start.y)))
+       {
+         verts.add(new PVector(polygon.get(i).start.x, polygon.get(i).start.y));
+       }
+       else 
+       {
+         verts.add(new PVector(polygon.get(i).end.x, polygon.get(i).end.y));
+       }
+       
      }
      System.out.println(verts.size());
      return verts;
@@ -273,33 +291,35 @@ class NavMesh
      //go through each node, then go through again
      for(int k = 0; k < triangles.size(); k++)
      {
-       int counter = 0;
+       
        
        for(int j = 0; j < graphNodes.size(); j++)
        {   //<>//
-         if((graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(0).y) || 
-         (graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(1).y) || 
-         (graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(2).y)) 
+         int counter = 0;
+         if(((graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(0).x) && (graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(0).y)) || 
+         ((graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(1).x) && (graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(1).y)) || 
+         ((graphNodes.get(k).vertices.get(0).x == graphNodes.get(j).vertices.get(2).x) && (graphNodes.get(k).vertices.get(0).y == graphNodes.get(j).vertices.get(2).y))) 
          {
            counter = counter +1;
          }
          
-         if((graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(0).y) || 
-         (graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(1).y) || 
-         (graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(2).y)) 
+         if(((graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(0).x) && (graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(0).y)) || 
+         ((graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(1).x) && (graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(1).y)) || 
+         ((graphNodes.get(k).vertices.get(1).x == graphNodes.get(j).vertices.get(2).x) && (graphNodes.get(k).vertices.get(1).y == graphNodes.get(j).vertices.get(2).y))) 
          {
            counter = counter +1;
          }
          
-          if((graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(0).y) || 
-         (graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(1).y) || 
-         (graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x && graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(2).y)) 
+          if(((graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(0).x) && (graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(0).y)) || 
+         ((graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(1).x) && (graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(1).y)) || 
+         ((graphNodes.get(k).vertices.get(2).x == graphNodes.get(j).vertices.get(2).x) && (graphNodes.get(k).vertices.get(2).y == graphNodes.get(j).vertices.get(2).y))) 
          {
            counter = counter +1;
          }
-          if(counter >= 2)
+         
+          if(counter == 2)
          {
-         graphNodes.get(k).addNeighbour(graphNodes.get(j), graphNodes.get(j).center);
+           graphNodes.get(k).addNeighbour(graphNodes.get(j), graphNodes.get(j).center);
          }
        }
        
@@ -328,8 +348,10 @@ class NavMesh
    
    void draw()
    {
+     //navmesh walls
       for(int i = 0; i < graph.size(); i++) 
       {
+        
         for(int j = 0; j < graph.get(i).size(); j++)
         {
           stroke(#eb4034);
@@ -337,24 +359,43 @@ class NavMesh
           
         }
       }
+
+
+      //centers
       for(int i =0; i < graphNodes.size(); i++)
       {
-        for(int k = 0; k < graphNodes.get(i).connections.size(); k++)
-        {
-          stroke(#ffea00);
-          line(graphNodes.get(i).center.x,graphNodes.get(i).center.y, 16, 16);
-        }
+        stroke(#ffea00);
+          strokeWeight(10);
+          line(graphNodes.get(i).center.x,graphNodes.get(i).center.y, graphNodes.get(i).center.x,graphNodes.get(i).center.y);
+          
       }
-      
+
+      //vertices
       /**
       for(int i =0; i < graphNodes.size(); i++)
       {
+
+        for(int k = 0; k < graphNodes.get(i).vertices.size(); k++)
+        {
+          stroke(#0320fc);
+          strokeWeight(10);
+          
+          line(graphNodes.get(i).vertices.get(k).x,graphNodes.get(i).vertices.get(k).y, graphNodes.get(i).vertices.get(k).x,graphNodes.get(i).vertices.get(k).y);
+          
+        }
+      }
+      */
+      
+      //connection lines
+      for(int i =0; i < graphNodes.size(); i++)
+      {
         for(int k = 0; k < graphNodes.get(i).connections.size(); k++)
         {
+          strokeWeight(1);
           stroke(#ffea00);
           line(graphNodes.get(i).connections.get(k).start.x,graphNodes.get(i).connections.get(k).start.y,graphNodes.get(i).connections.get(k).end.x,graphNodes.get(i).connections.get(k).end.y);
         }
       }
-      */
+
    }
 }

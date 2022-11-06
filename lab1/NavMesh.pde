@@ -1,5 +1,6 @@
 // Useful to sort lists by a custom key
 import java.util.Comparator;
+import java.util.PriorityQueue;
 
 /// In this file you will implement your navmesh and pathfinding. 
 
@@ -29,7 +30,7 @@ class Node
    }
    
    Node() 
-   {
+   { //<>//
      neighbors = new ArrayList<Node>();
      connections = new ArrayList<Wall>();
    }
@@ -90,7 +91,7 @@ class Node
    }
    
 }
-
+ //<>//
 class NavMesh
 {  
    

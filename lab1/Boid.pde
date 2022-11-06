@@ -115,11 +115,6 @@ class Boid
      //ratio of requiredRotation left to turn in relation to PI
      float rScaler = PI/requiredRotation; 
     
-     /**  
-     if(distance <= initialTargetDistance/2) { //if we are closer than half the distance, begin to decelerate
-       vScaler = -vScaler ;
-     }
-     */
      
      if (kinematic.getSpeed() > topSpeed) 
        topSpeed = kinematic.getSpeed();
@@ -152,7 +147,6 @@ class Boid
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
        kinematic.increaseSpeed(movement, -kinematic.getRotationalVelocity());
-       //kinematic.increaseSpeed(movement, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
      {
@@ -179,43 +173,18 @@ class Boid
        
        //if there is a waypoint after current target
        if(path.size() > 1)
-       {
-         //calculate the angle between the current target and next target
-         double waypointX = target.x - path.get(1).x;
-         double waypointY = target.y - path.get(1).y;
-         
-         float waypointAngle = atan2((float)waypointX, (float)waypointY);
-         float waypointRotation = normalize_angle_left_right(waypointAngle - kinematic.getHeading());
-         
-         if(distance < 10) 
+       { 
+         if(distance <= 10) 
          { //if we are near the current target and there is a next target
-           topSpeed = 0;
            initialTargetDistance = 0;
            this.target = path.get(1);
            path.remove(0);
+           topSpeed = 0;
          }
          
        }
        
      }
-     /**
-     if (abs((float)distance) <= 90 && abs((float)distance) > 80 && kinematic.getSpeed() > 0) // gradual slow down if moving forward
-     {
-       kinematic.increaseSpeed(acceleration * dt * -1 * 20, 0);
-     }
-     else if (abs((float)distance) <= 80 && abs((float)distance) > 75 && kinematic.getSpeed() > 0) 
-     {
-       kinematic.increaseSpeed(acceleration * dt * -2 *20, 0);
-     }
-     else if (abs((float)distance) <= 75 && kinematic.getSpeed() > 0) 
-     {
-       kinematic.increaseSpeed(acceleration * dt * -3 *20, 0);
-     }
-     else if (kinematic.getSpeed() <= 0) //if moving backwards, stop moving
-     {
-       kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
-     }
-     */
   
    }
    

@@ -17,7 +17,7 @@ class Node
    Node previousNode;
    float distanceTraveled;
    double heuristic;
-   float totalCost;
+   double totalCost;
    
    Node(ArrayList<Wall> walls, int ID) 
    {
@@ -30,7 +30,7 @@ class Node
    }
    
    Node() 
-   { //<>//
+   { //<>// //<>//
      neighbors = new ArrayList<Node>();
      connections = new ArrayList<Wall>();
    }
@@ -91,11 +91,19 @@ class Node
    }
    
    void setHeuristic(PVector target)
-   { //<>//
+   { //<>// //<>//
      double x = target.x - center.x;
      double y = target.y - center.y;
      double distance = Math.sqrt(x*x + y*y);
      heuristic = distance;
+   }
+   
+   void setCost(PVector origin)
+   {
+    double x = center.x - origin.x;
+    double y = center.y - origin.y;
+    double distance = Math.sqrt(x*x + y*y);
+    totalCost = distance;
    }
    
 }
@@ -343,6 +351,8 @@ class NavMesh
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
+     PriorityQueue<Node> frontier = new PriorityQueue<>();
+     
       /// implement A* to find a path
       ArrayList<PVector> result = null;
       for(int i = 0; i < graphNodes.size(); i++)

@@ -374,6 +374,12 @@ class NavMesh
       
       frontier.add(startNode);
       
+      while(frontier.peek() != endNode)
+      {
+        //implement A*
+        
+      }
+      
       return result;
    }
    

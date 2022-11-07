@@ -345,6 +345,10 @@ class NavMesh
    {
       /// implement A* to find a path
       ArrayList<PVector> result = null;
+      for(int i = 0; i < graphNodes.size(); i++)
+      {
+       graphNodes.get(i).setHeuristic(destination);
+      }
       
       return result;
    }

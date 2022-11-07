@@ -49,18 +49,18 @@ class Node
    PVector getCenter() 
    {
      PVector cent = new PVector(0,0); 
-     /**
-     for(Wall w: polygon)
+     
+     for(PVector v: vertices)
      {
-       System.out.println(w.end.x + " " + w.start.y);
-       cent.add(w.start);
+       cent.add(v);
      }
-     System.out.println("center: " +cent.x + " " + cent.y);
-     */
+
+     /**
      for(int i =0; i< polygon.size(); i++)
      {
        cent.add(polygon.get(i).center());
      }
+     */
      return cent.div(3);
    }
    
@@ -106,14 +106,20 @@ class Node
     totalCost = distance;
    }
    
+   double getTotalCost()
+   {
+     return totalCost;
+   }
 }
 
 class NavMesh
-{  
-   
+{  //holds the index of walls that contain reflex angles
    ArrayList<Integer> reflexAngles;
+   //holds newly created walls in NavMesh
    ArrayList<Wall> navMeshWalls; 
+   //holds a collection of ArrayLists which correspond to all polygons within NavMesh
    ArrayList<ArrayList<Wall>> graph;
+   //holds collections of Nodes of the NavMesh
    ArrayList<Node> graphNodes;
    
    //calculate the NavMesh using EarTrimming method
@@ -135,6 +141,7 @@ class NavMesh
       createNodes(graph);
       System.out.println("done");
    }
+   
    
    boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
    {
@@ -214,7 +221,8 @@ class NavMesh
      return earTrimming(nodes, ++iteration);   
    }
    
-   
+  //returns the wall of parameter index
+  //indices are looped to create a looped Array
    Wall getNeighbour(ArrayList<Wall> walls, int index) {
      if(index >= walls.size())
        index = index % walls.size();
@@ -224,7 +232,7 @@ class NavMesh
      return walls.get(index);
    }
    
-    //<>//
+   //returns the looped Index for an arrayList //<>//
    int getIndex(ArrayList<Wall> walls, int index) 
    {
      if(index >= walls.size())
@@ -235,6 +243,7 @@ class NavMesh
      return index;
    }
    
+   //goes through a Map and calculates which vertices are reflex
    ArrayList recalculateReflex(Map tempMap, ArrayList<Integer> reflexVerts, int iteration) 
    {
      reflexVerts.clear();
@@ -244,13 +253,11 @@ class NavMesh
        float direction;
        if(iteration == 0) 
        {
-         
          direction = tempMap.walls.get(i).normal.dot(getNeighbour(tempMap.walls, i+1).direction);
        }
        else
        {
          direction = getNeighbour(tempMap.walls, i-1).normal.dot(tempMap.walls.get(i).direction); //get dot product of the current edge normal to the next edge
-      
        }
         
        if(direction > 0) 
@@ -307,9 +314,7 @@ class NavMesh
      
      //go through each node, then go through again
      for(int k = 0; k < triangles.size(); k++)
-     {
-       
-       
+     { 
        for(int j = 0; j < graphNodes.size(); j++)
        {   //<>//
          int counter = 0;
@@ -339,26 +344,35 @@ class NavMesh
            graphNodes.get(k).addNeighbour(graphNodes.get(j), graphNodes.get(j).center);
          }
        }
-       
-      
      }
-     
-     
-     
-     
    }
    
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
-     PriorityQueue<Node> frontier = new PriorityQueue<>();
+     PriorityQueue<Node> frontier = new PriorityQueue<>(Comparator.comparing(Node::getTotalCost));
+     ArrayList<Node> visitedNodes = new ArrayList<Node>();
      
       /// implement A* to find a path
       ArrayList<PVector> result = null;
       for(int i = 0; i < graphNodes.size(); i++)
       {
-       graphNodes.get(i).setHeuristic(destination);
+        graphNodes.get(i).setHeuristic(destination);
       }
+      
+      //determine what node we are starting in
+      Node startNode = new Node();
+      Node endNode = new Node();
+      for(int j = 0; j < graphNodes.size(); j++)
+      {
+        if(isPointInPolygon(start, graphNodes.get(j).polygon) == true)
+          startNode =  graphNodes.get(j);
+        
+        if(isPointInPolygon(destination, graphNodes.get(j).polygon) == true)
+          endNode =  graphNodes.get(j);
+      }
+      
+      frontier.add(startNode);
       
       return result;
    }
@@ -371,10 +385,11 @@ class NavMesh
    
    void draw()
    {
+     //draws the portions of the navmesh
+     
      //navmesh walls
       for(int i = 0; i < graph.size(); i++) 
       {
-        
         for(int j = 0; j < graph.get(i).size(); j++)
         {
           stroke(#eb4034);
@@ -404,7 +419,6 @@ class NavMesh
           strokeWeight(10);
           
           line(graphNodes.get(i).vertices.get(k).x,graphNodes.get(i).vertices.get(k).y, graphNodes.get(i).vertices.get(k).x,graphNodes.get(i).vertices.get(k).y);
-          
         }
       }
       */
@@ -419,6 +433,5 @@ class NavMesh
           line(graphNodes.get(i).connections.get(k).start.x,graphNodes.get(i).connections.get(k).start.y,graphNodes.get(i).connections.get(k).end.x,graphNodes.get(i).connections.get(k).end.y);
         }
       }
-
    }
 }

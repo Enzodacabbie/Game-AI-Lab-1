@@ -113,7 +113,7 @@ class Boid
      //ratio of distance left to travel over the total distance needed to be travelled
      float vScaler = (float)distance/initialTargetDistance; 
      //ratio of requiredAngle left to turn over pi
-     float rScaler = requiredRotation/PI; 
+     float rScaler = PI/requiredRotation;
     
      
      if (kinematic.getSpeed() > topSpeed) 

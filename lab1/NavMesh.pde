@@ -86,7 +86,7 @@ class Node
        }
        
      }
-     System.out.println(verts.size());
+     
      return verts;
    }
    
@@ -203,7 +203,7 @@ class NavMesh
            //add the triangle to the navmesh and remove the vertex used
            if(validEar(polygon, n, (i-1), i, (i+1)))
            {
-             System.out.println("Making ear using: " + (i-1) + "  " + i + " " + (i+1));
+             //System.out.println("Making ear using: " + (i-1) + "  " + i + " " + (i+1));
              
              //arraylist will store the new set of vertices minus the vertex removed
              //it will be used as input into the recursive call
@@ -280,12 +280,6 @@ class NavMesh
        
 
      }
-     System.out.print("Reflex Vertices: ");
-     for(int k = 0; k < reflexVerts.size(); k++)
-       {
-         System.out.print(" " + reflexVerts.get(k));
-       }
-     System.out.println();
      
      return reflexVerts;
    }
@@ -320,7 +314,6 @@ class NavMesh
        graphNodes.add(node);
      }
      
-     System.out.println("node size: " + graphNodes.size());
      
      //go through each node, then go through again
      for(int k = 0; k < triangles.size(); k++)
@@ -385,11 +378,11 @@ class NavMesh
       startNode.distanceTraveled = 0;
       frontier.add(startNode);
       
-      System.out.println("Start triangle: " + startNode.id+ " End Triangle: " + endNode.id);
+      //System.out.println("Start triangle: " + startNode.id+ " End Triangle: " + endNode.id);
       
       while(frontier.peek().id != endNode.id)
       {
-        System.out.println("hello");
+        
         //implement A*
         Node n = frontier.poll();
         System.out.println(n.totalCost);
@@ -414,7 +407,6 @@ class NavMesh
       {
         result.add(findNeighbourWall(path, path.previousNode).center());
         path = path.previousNode;
-        System.out.println("bruh");
       }
       
       result.add(start);

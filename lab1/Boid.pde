@@ -99,8 +99,6 @@ class Boid
      //find angle to turn from the angle 
      float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
      
-     
-        
      //calculate the distance to the target by taking the square root of sum of squared delta distances
      double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
      
@@ -109,7 +107,6 @@ class Boid
      { 
        initialTargetDistance = (float)distance;
      } 
-     
      
      //ratio of distance left to travel over the total distance needed to be travelled
      float vScaler = (float)distance/initialTargetDistance; 
@@ -120,7 +117,7 @@ class Boid
      if (kinematic.getSpeed() > topSpeed) 
        topSpeed = kinematic.getSpeed();
        
-     float x = 10;
+     float x = 5;
      float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      
      
@@ -143,7 +140,7 @@ class Boid
      }
        movement = acceleration * dt * x;
          
-     //System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
+     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
@@ -196,7 +193,6 @@ class Boid
       this.target = waypoints.get(0);
       path = waypoints;
       followPath = true;
-      //nm.findPath(kinematic.position, target);
       
    }
    

@@ -99,6 +99,7 @@ class Boid
      //find angle to turn from the angle 
      float requiredRotation = normalize_angle_left_right(angle - kinematic.getHeading());
      
+     
         
      //calculate the distance to the target by taking the square root of sum of squared delta distances
      double distance = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
@@ -190,7 +191,12 @@ class Boid
    
    void seek(PVector target)
    {
-      this.target = target;
+     ArrayList<PVector> waypoints = nm.findPath(kinematic.position, target);
+      //this.target = target;
+      this.target = waypoints.get(0);
+      path = waypoints;
+      followPath = true;
+      //nm.findPath(kinematic.position, target);
       
    }
    

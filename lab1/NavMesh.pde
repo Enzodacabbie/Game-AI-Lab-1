@@ -1,6 +1,7 @@
 // Useful to sort lists by a custom key
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.Collections;
 
 /// In this file you will implement your navmesh and pathfinding. 
 
@@ -29,21 +30,26 @@ class Node
      connections = new ArrayList<Wall>();
    }
    
+   
    Node() 
-   { //<>// //<>//
+   {
      neighbors = new ArrayList<Node>();
      connections = new ArrayList<Wall>();
    }
+   
    
    void createNewConnection(PVector target)
    {
      connections.add(new Wall(center, target));
    }
    
+   
+   
    void addToTotalCost(float previousCost)
    {
      totalCost += previousCost;
    }
+   
    
    //calculate the center by taking the mean of the vertices
    PVector getCenter() 
@@ -91,24 +97,30 @@ class Node
    }
    
    void setHeuristic(PVector target)
-   { //<>// //<>//
+   { 
      double x = target.x - center.x;
      double y = target.y - center.y;
      double distance = Math.sqrt(x*x + y*y);
      heuristic = distance;
    }
    
-   void setCost(PVector origin)
+   void setCost(Node n)
    {
+    PVector origin = n.center;
     double x = center.x - origin.x;
     double y = center.y - origin.y;
     double distance = Math.sqrt(x*x + y*y);
-    totalCost = distance;
+    totalCost = distance + n.distanceTraveled;
    }
    
    double getTotalCost()
    {
      return totalCost;
+   }
+   
+   void setPrevious(Node n)
+   {
+     previousNode = n;
    }
 }
 
@@ -125,12 +137,12 @@ class NavMesh
    //calculate the NavMesh using EarTrimming method
    void bake(Map map)
    {
-     Map mapCopy = map; //<>//
-     reflexAngles  = new ArrayList<Integer>(); //<>//
-     navMeshWalls = new ArrayList<Wall>(); //<>//
-     graph = new ArrayList<ArrayList<Wall>>(); //<>//
-     ArrayList<PVector> nodes = new ArrayList<PVector>(); //<>//
-     graphNodes = new ArrayList<Node>(); //<>//
+     Map mapCopy = map;
+     reflexAngles  = new ArrayList<Integer>();
+     navMeshWalls = new ArrayList<Wall>();
+     graph = new ArrayList<ArrayList<Wall>>();
+     ArrayList<PVector> nodes = new ArrayList<PVector>();
+     graphNodes = new ArrayList<Node>();
       
       for(Wall w : mapCopy.walls) 
       {
@@ -284,7 +296,6 @@ class NavMesh
      boolean valid = true;
      for(int i = 0; i < n.length; i++)
      {
-       
        //skip the points that make up the ear being checked
        if(i == a)
          continue;
@@ -295,8 +306,7 @@ class NavMesh
          
        //if a single point is inside the polygon, then the ear is not valid
        if(isPointInPolygon(n[i], polygon))
-         valid = false;
-             
+         valid = false; 
      }
      
      return valid;
@@ -351,10 +361,10 @@ class NavMesh
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
      PriorityQueue<Node> frontier = new PriorityQueue<>(Comparator.comparing(Node::getTotalCost));
-     ArrayList<Node> visitedNodes = new ArrayList<Node>();
+     ArrayList<Integer> visitedNodes = new ArrayList<Integer>();
      
       /// implement A* to find a path
-      ArrayList<PVector> result = null;
+      ArrayList<PVector> result = new ArrayList<PVector>();
       for(int i = 0; i < graphNodes.size(); i++)
       {
         graphNodes.get(i).setHeuristic(destination);
@@ -366,21 +376,92 @@ class NavMesh
       for(int j = 0; j < graphNodes.size(); j++)
       {
         if(isPointInPolygon(start, graphNodes.get(j).polygon) == true)
-          startNode =  graphNodes.get(j);
+          startNode = graphNodes.get(j);
         
         if(isPointInPolygon(destination, graphNodes.get(j).polygon) == true)
           endNode =  graphNodes.get(j);
       }
       
+      startNode.distanceTraveled = 0;
       frontier.add(startNode);
       
-      while(frontier.peek() != endNode)
+      System.out.println("Start triangle: " + startNode.id+ " End Triangle: " + endNode.id);
+      
+      while(frontier.peek().id != endNode.id)
       {
+        System.out.println("hello");
         //implement A*
-        
+        Node n = frontier.poll();
+        System.out.println(n.totalCost);
+        visitedNodes.add(n.id);
+       
+        for(int i = 0; i < n.neighbors.size(); i++)
+        {
+          if(!visitedNodes.contains(n.neighbors.get(i).id))
+          {
+            Node neighbor = n.neighbors.get(i);
+            neighbor.setPrevious(n);
+            neighbor.setCost(n);
+            frontier.add(neighbor);
+          }
+        }
+      }
+      Node path = frontier.poll();
+      result.add(destination);
+      
+      
+      while(path.id != startNode.id) //<>//
+      {
+        result.add(findNeighbourWall(path, path.previousNode).center());
+        path = path.previousNode;
+        System.out.println("bruh");
       }
       
+      result.add(start);
+      Collections.reverse(result);
+      
+      System.out.println("we made it");
+      
       return result;
+   }
+   
+   Wall findNeighbourWall(Node x, Node y)
+   {
+     PVector vertex1 = null;
+     PVector vertex2 = null;
+     
+     for(int i = 0; i< x.vertices.size(); i++)
+     {
+       if(x.vertices.get(i).x == y.vertices.get(0).x && x.vertices.get(i).y == y.vertices.get(0).y)
+       {
+         if(vertex1 == null)
+           vertex1 = x.vertices.get(i);
+         else
+           vertex2 = x.vertices.get(i);
+       }
+       
+       if(x.vertices.get(i).x == y.vertices.get(1).x && x.vertices.get(i).y == y.vertices.get(1).y)
+       {
+         if(vertex1 == null)
+           vertex1 = x.vertices.get(i);
+         else
+           vertex2 = x.vertices.get(i);
+       }
+       
+       if(x.vertices.get(i).x == y.vertices.get(2).x && x.vertices.get(i).y == y.vertices.get(2).y)
+       {
+         if(vertex1 == null)
+           vertex1 = x.vertices.get(i);
+         else
+           vertex2 = x.vertices.get(i);
+       }
+       
+     }
+     if(vertex1 != null && vertex2 != null)
+     {
+       return new Wall(vertex1, vertex2);
+     }
+     return new Wall(new PVector(), new PVector());
    }
    
    
@@ -403,7 +484,6 @@ class NavMesh
           
         }
       }
-
 
       //centers
       for(int i =0; i < graphNodes.size(); i++)

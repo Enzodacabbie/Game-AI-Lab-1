@@ -20,6 +20,7 @@ class Node
    double heuristic;
    double totalCost;
    
+   //constructor, takes in the walls that make up polygon and ID
    Node(ArrayList<Wall> walls, int ID) 
    {
      id = ID;
@@ -30,24 +31,17 @@ class Node
      connections = new ArrayList<Wall>();
    }
    
-   
+   //default constructor
    Node() 
    {
      neighbors = new ArrayList<Node>();
      connections = new ArrayList<Wall>();
    }
    
-   
+   //creates a new wall between the center of this node and some PVector, preferably the center of another node
    void createNewConnection(PVector target)
    {
      connections.add(new Wall(center, target));
-   }
-   
-   
-   
-   void addToTotalCost(float previousCost)
-   {
-     totalCost += previousCost;
    }
    
    
@@ -60,22 +54,17 @@ class Node
      {
        cent.add(v);
      }
-
-     /**
-     for(int i =0; i< polygon.size(); i++)
-     {
-       cent.add(polygon.get(i).center());
-     }
-     */
      return cent.div(3);
    }
    
-   
+   //returns an arrayList of PVectors which are the vertices
    ArrayList<PVector> findVertices()
    {
      ArrayList<PVector> verts = new ArrayList<PVector>();
+     //go through the polygon and add the start/end of each wall
      for(int i = 0; i < polygon.size(); i++) 
      {
+       //this check is made as if a wall is not facing the correct way, a vertex could be double counted
        if(!verts.contains(new PVector(polygon.get(i).start.x, polygon.get(i).start.y)))
        {
          verts.add(new PVector(polygon.get(i).start.x, polygon.get(i).start.y));
@@ -86,16 +75,17 @@ class Node
        }
        
      }
-     
      return verts;
    }
    
+   //adds node to list of neighbors and adds a wall between the centers
    void addNeighbour(Node n, PVector otherCenter) 
    {
      connections.add(new Wall(center, otherCenter));
      neighbors.add(n);
    }
    
+   //calculates the straight line distance from the center to a target
    void setHeuristic(PVector target)
    { 
      double x = target.x - center.x;
@@ -104,6 +94,9 @@ class Node
      heuristic = distance;
    }
    
+   //calculate the distance between the center of this node and an input node
+   //then, add that distance to overall distance traveled by the input node
+   //input node is meant to be previous node
    void setCost(Node n)
    {
     PVector origin = n.center;
@@ -113,11 +106,13 @@ class Node
     totalCost = distance + n.distanceTraveled;
    }
    
+   //return cost
    double getTotalCost()
    {
      return totalCost;
    }
    
+   //set the previous node to node
    void setPrevious(Node n)
    {
      previousNode = n;
@@ -127,34 +122,52 @@ class Node
 class NavMesh
 {  //holds the index of walls that contain reflex angles
    ArrayList<Integer> reflexAngles;
+  
    //holds newly created walls in NavMesh
    ArrayList<Wall> navMeshWalls; 
+   
    //holds a collection of ArrayLists which correspond to all polygons within NavMesh
    ArrayList<ArrayList<Wall>> graph;
+   
    //holds collections of Nodes of the NavMesh
    ArrayList<Node> graphNodes;
    
    //calculate the NavMesh using EarTrimming method
    void bake(Map map)
    {
+     //make a copy of the map as to not to change structure of level
      Map mapCopy = map;
+     
+     //holds the indices of the walls that contain reflex angles
      reflexAngles  = new ArrayList<Integer>();
+     
+     //holds the set of new Walls that are created during the creation of NavMesh
      navMeshWalls = new ArrayList<Wall>();
+     
+     //holds the polygons that make up the navmesh
      graph = new ArrayList<ArrayList<Wall>>();
+     
+     //holds the nodes that make up the navmesh graph
      ArrayList<PVector> nodes = new ArrayList<PVector>();
+     
      graphNodes = new ArrayList<Node>();
       
-      for(Wall w : mapCopy.walls) 
-      {
-        nodes.add(w.start);
-      }
-      
-      earTrimming(nodes, 0); 
-      createNodes(graph);
-      System.out.println("done");
+     //copy the vertices into an arrayList of vertices
+     for(Wall w : mapCopy.walls) 
+     {
+       nodes.add(w.start);
+     }
+     
+     //decompose the polygon into a set of triangles
+     earTrimming(nodes, 0); 
+     
+     //create Nodes out of the newly formed triangles
+     createNodes(graph);
+     
    }
    
-   
+   //method that uses triangulation via Ear Trimming to decompose polygon
+   //recursively calls until there are only three vertices remaining in list of vertices
    boolean earTrimming(ArrayList<PVector> nodes, int iteration) 
    {
      ArrayList reflexVerts = new ArrayList<Integer>();
@@ -231,7 +244,7 @@ class NavMesh
      //iteration is incremented as the way for calculating reflex vertices is different 
      //only for the very first iteration
      return earTrimming(nodes, ++iteration);   
-   }
+   } //<>//
    
   //returns the wall of parameter index
   //indices are looped to create a looped Array
@@ -244,7 +257,7 @@ class NavMesh
      return walls.get(index);
    }
    
-   //returns the looped Index for an arrayList //<>//
+   //returns the looped Index for an arrayList 
    int getIndex(ArrayList<Wall> walls, int index) 
    {
      if(index >= walls.size())
@@ -263,6 +276,8 @@ class NavMesh
      for(int i = 0; i < tempMap.walls.size(); i++) 
      {
        float direction;
+       
+       //the reflex vertices are calculated differently only on the first time as removing vertices messes with the order 
        if(iteration == 0) 
        {
          direction = tempMap.walls.get(i).normal.dot(getNeighbour(tempMap.walls, i+1).direction);
@@ -276,11 +291,7 @@ class NavMesh
        { //if the dot product is positive, then the angle between the edges is reflex
          reflexVerts.add(i); 
        }
-     
-       
-
      }
-     
      return reflexVerts;
    }
    
@@ -306,8 +317,9 @@ class NavMesh
      return valid;
    }
    
+   //creates nodes for NavMesh from arrayList of polygons generated in ear trimming
    void createNodes(ArrayList<ArrayList<Wall>> triangles) 
-   {
+   { //<>//
      for(int i = 0; i < triangles.size(); i++)
      {
        Node node = new Node(triangles.get(i), i);
@@ -315,7 +327,7 @@ class NavMesh
      }
      
      
-     //go through each node, then go through again
+     //go through each node, then check every other node if they share any vertices
      for(int k = 0; k < triangles.size(); k++)
      { 
        for(int j = 0; j < graphNodes.size(); j++)
@@ -342,7 +354,9 @@ class NavMesh
            counter = counter +1;
          }
          
-          if(counter == 2)
+         //if they share 2 vertices, that means that they share an edge and are neighbors
+         //as every polygon is a triangle, only need to check if 2 vertices match
+         if(counter == 2)
          {
            graphNodes.get(k).addNeighbour(graphNodes.get(j), graphNodes.get(j).center);
          }
@@ -350,14 +364,18 @@ class NavMesh
      }
    }
    
-   
+   //finds path from start PVector to destination PVector using A* search
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
+     //priority queue which stores the search frontier, sorts by the total cost of the nodes
      PriorityQueue<Node> frontier = new PriorityQueue<>(Comparator.comparing(Node::getTotalCost));
+     
+     //holds the nodes that have already been visited
      ArrayList<Integer> visitedNodes = new ArrayList<Integer>();
      
-      /// implement A* to find a path
-      ArrayList<PVector> result = new ArrayList<PVector>();
+     ArrayList<PVector> result = new ArrayList<PVector>();
+      
+      //set the heuristic for every node in the graph
       for(int i = 0; i < graphNodes.size(); i++)
       {
         graphNodes.get(i).setHeuristic(destination);
@@ -375,23 +393,22 @@ class NavMesh
           endNode =  graphNodes.get(j);
       }
       
+      //add the start node to the frontier
       startNode.distanceTraveled = 0;
       frontier.add(startNode);
       
-      //System.out.println("Start triangle: " + startNode.id+ " End Triangle: " + endNode.id);
       
       while(frontier.peek().id != endNode.id)
       {
-        
-        //implement A*
+        //remove first node and add to visited
         Node n = frontier.poll();
-        System.out.println(n.totalCost);
         visitedNodes.add(n.id);
-       
+        //<>//
         for(int i = 0; i < n.neighbors.size(); i++)
         {
           if(!visitedNodes.contains(n.neighbors.get(i).id))
           {
+            //add neighbors to frontier if they are not visited
             Node neighbor = n.neighbors.get(i);
             neighbor.setPrevious(n);
             neighbor.setCost(n);
@@ -399,17 +416,21 @@ class NavMesh
           }
         }
       }
+      //add the final node to the result
       Node path = frontier.poll();
       result.add(destination);
       
-      
-      while(path.id != startNode.id) //<>//
+      //add the centers of the edge that connects the triangles until we reach starting node
+      while(path.id != startNode.id) 
       {
         result.add(findNeighbourWall(path, path.previousNode).center());
         path = path.previousNode;
       }
       
+      //add the starting node
       result.add(start);
+      
+      //reverse the result as we inputted the path backwards
       Collections.reverse(result);
       
       System.out.println("we made it");
@@ -417,6 +438,7 @@ class NavMesh
       return result;
    }
    
+   //finds the wall that two nodes share given two nodes
    Wall findNeighbourWall(Node x, Node y)
    {
      PVector vertex1 = null;

@@ -117,10 +117,10 @@ class Boid
      if (kinematic.getSpeed() > topSpeed) 
        topSpeed = kinematic.getSpeed();
        
-     float x = 5;
-     float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
+     //float x = 5;
+     float movement = acceleration * dt * 15; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      
-     
+     /*
      if (vScaler < 0.5) 
      { //if we are less than half the starting distance away, then start to decelerate
        x = -x;
@@ -139,8 +139,9 @@ class Boid
          
          
      } 
+     */
      
-     
+     /*
      
      if(vScaler < 0.1) 
      { //if we are less than 10% of the original distance away, decelerate even further
@@ -159,7 +160,8 @@ class Boid
          
          
      }
-       movement = acceleration * dt * x;
+     */
+       //movement = acceleration * dt * x;
          
      System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
@@ -176,6 +178,17 @@ class Boid
      {
        kinematic.increaseSpeed(movement, rotational_acceleration * dt * (-1) * Math.abs(rScaler));
      }
+     
+     if(vScaler < 0.15 || (vScaler < 0.5 && distance < 150) || (vScaler < 0.75 && distance < 50))
+     {
+      movement = (-1) * acceleration * Math.abs(1/vScaler); 
+      
+      if(kinematic.getSpeed() >= 35)
+      {
+        movement = (-1)* acceleration * dt * 25 * Math.abs(1/vScaler); 
+      }
+     }
+     
      if(distance <= 5) {
         kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
         topSpeed = 0;

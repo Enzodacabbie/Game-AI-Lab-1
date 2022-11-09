@@ -110,7 +110,7 @@ class Boid
      
      //ratio of distance left to travel over the total distance needed to be travelled
      float vScaler = (float)distance/initialTargetDistance; 
-     //ratio of requiredAngle left to turn over pi
+     //ratio of PI over required angle to turn
      float rScaler = PI/requiredRotation;
     
      
@@ -121,55 +121,52 @@ class Boid
      float movement = acceleration * dt * x * initialTargetDistance; //multiply by initialTargetDistance as the further we are initially, the faster we want to accelerate
      
      
-     if (vScaler < 0.5) 
-     { //if we are less than half the starting distance away, then start to decelerate
+     if (vScaler < 0.5) //if we are less than half the starting distance away, then start to decelerate
+     { 
        x = -x;
        
-       if(kinematic.getSpeed() <= topSpeed/2) 
-       { //if we reach the minimum threshold speed for this radius, stop decelerating
+       if(kinematic.getSpeed() <= topSpeed/2) //if we reach the minimum threshold speed for this radius, stop decelerating
+       { 
          x = 0;
        }
        
-       
+       //when making waypoint turns, if the angle to turn is within a certain range and boid is moving too slowly (basically stopping)
+       //then speed up a bit 
        if(path.size()>1 && requiredRotation >= -0.03 && requiredRotation <= 0.03 && kinematic.getSpeed() < 25)
          {
           x = 0.25;
-       
          }
-         
-         
      } 
      
      
      
-     if(vScaler < 0.1) 
-     { //if we are less than 10% of the original distance away, decelerate even further
+     if(vScaler < 0.1) //if we are less than 10% of the original distance away, decelerate even further
+     { 
        x = -25;
-       if(kinematic.getSpeed() <= topSpeed/5)
-       {//if we reach the minimum threshold speed for this radius, stop decelerating
+       if(kinematic.getSpeed() <= topSpeed/5) //if we reach the minimum threshold speed for this radius, stop decelerating
+       {
          x = 0;
        }
          
-         
+         //when making waypoint turns, if the angle to turn is within a certain range and boid is moving too slowly (basically stopping)
+         //then speed up a bit 
          if(path.size()>1 && requiredRotation >= -0.04 && requiredRotation <= 0.04 && kinematic.getSpeed() < 20)
          {
           x = 1;
-       
-         }
-         
-         
+
+         } 
      }
        movement = acceleration * dt * x;
-         
-     System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
+       
+     //Uncomment to view speeds and rotations
+     //System.out.println(kinematic.getSpeed() + ", " + kinematic.getRotationalVelocity() + ", " + requiredRotation+ ", " + topSpeed);
         
      if (requiredRotation <= 0.05 && requiredRotation >= -0.05) // if close to correct angle, stop rotating
      {
        kinematic.increaseSpeed(movement, -kinematic.getRotationalVelocity());
-       //kinematic.increaseSpeed(movement, 0);
      }
      else if (requiredRotation > 0) // if required rotation is positive, go right
-     {
+     {                              // rotational acceleration is multiplied by PI/requiredRotation so that turn speeds are scaled according to the angle
        kinematic.increaseSpeed(movement, rotational_acceleration * dt* Math.abs(rScaler));
      }
      else //turn left 
@@ -210,7 +207,6 @@ class Boid
    void seek(PVector target)
    {
      ArrayList<PVector> waypoints = nm.findPath(kinematic.position, target);
-      //this.target = target;
       this.target = waypoints.get(0);
       path = waypoints;
       followPath = true;
@@ -219,7 +215,6 @@ class Boid
    
    void follow(ArrayList<PVector> waypoints)
    {
-      // TODO: change to follow *all* waypoints
       this.target = waypoints.get(0);
       path = waypoints;
       followPath = true;

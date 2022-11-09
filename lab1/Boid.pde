@@ -129,14 +129,35 @@ class Boid
        { //if we reach the minimum threshold speed for this radius, stop decelerating
          x = 0;
        }
+       
+       
+       if(path.size()>1 && requiredRotation >= -0.03 && requiredRotation <= 0.03 && kinematic.getSpeed() < 25)
+         {
+          x = 0.25;
+       
+         }
+         
+         
      } 
+     
      
      
      if(vScaler < 0.1) 
      { //if we are less than 10% of the original distance away, decelerate even further
        x = -25;
-       if(kinematic.getSpeed() <= topSpeed/5) //if we reach the minimum threshold speed for this radius, stop decelerating
+       if(kinematic.getSpeed() <= topSpeed/5)
+       {//if we reach the minimum threshold speed for this radius, stop decelerating
          x = 0;
+       }
+         
+         
+         if(path.size()>1 && requiredRotation >= -0.04 && requiredRotation <= 0.04 && kinematic.getSpeed() < 20)
+         {
+          x = 1;
+       
+         }
+         
+         
      }
        movement = acceleration * dt * x;
          
